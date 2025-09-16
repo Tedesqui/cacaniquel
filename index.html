@@ -22,7 +22,11 @@
         .spin-button:disabled { background-color: #555; cursor: not-allowed; }
         .buy-chips-button { padding: 10px 20px; font-size: 1em; background-color: var(--primary-color); border-radius: 5px; border: none; color: white; cursor: pointer; transform: scale(1.5); order: 2; }
         .pulsating-button { animation: pulse-button 2s 5; }
-        @keyframes pulse-button { 0% { box-shadow: 0 0 0 0 rgba(171, 71, 188, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(171, 71, 188, 0); } 100% { box-shadow: 0 0 0 0 rgba(171, 71, 188, 0); } }
+        @keyframes pulse-button {
+            0% { box-shadow: 0 0 0 0 rgba(171, 71, 188, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(171, 71, 188, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(171, 71, 188, 0); }
+        }
         #result-text { margin-top: 20px; font-size: 1.2em; font-weight: bold; height: 30px; transition: color 0.3s; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background-color: #333; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; }
@@ -40,7 +44,6 @@
     </style>
 </head>
 <body>
-
     <div id="start-overlay">
         <h1>Bem-Vindo!</h1>
         <p>Clique em qualquer lugar para começar</p>
@@ -79,14 +82,11 @@
         const resultText = document.getElementById('result-text');
         const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
         const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
-        
         const spinSound = document.getElementById('spin-sound');
         const winSound = document.getElementById('win-sound');
         const buyChipsSound = document.getElementById('buy-chips-sound');
         const backgroundMusic = document.getElementById('background-music');
-
-        let currentPaymentId, paymentCheckInterval;
-        let selectedPackageId, selectedAmount;
+        let currentPaymentId, paymentCheckInterval, selectedPackageId, selectedAmount;
         let isMusicPlaying = false;
 
         const startOverlay = document.getElementById('start-overlay');
@@ -150,25 +150,22 @@
                 }, 3000);
                 return;
             }
-            
             spinBtn.disabled = true;
             resultText.textContent = "Girando...";
             resultText.style.color = 'var(--light-text)';
+            reels.forEach(reel => animateReel(reel));
             spinSound.play();
-
             try {
                 const response = await fetch('/api/spin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ betAmount }), });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
-                
-                // ATUALIZAÇÃO: Animação e exibição do resultado agora são controladas juntas
-                reels.forEach((reel, index) => {
-                    // A animação agora para no símbolo correto, evitando o "branco"
-                    animateReel(reel, 15, data.symbols[index]); 
-                });
-                
-                // O resultado é exibido após a animação terminar (6 segundos)
                 setTimeout(() => {
+                    reels.forEach((reel, index) => {
+                        const reelSymbols = reel.querySelector('.reel-symbols');
+                        reelSymbols.style.transition = 'none';
+                        reelSymbols.style.top = '0px';
+                        reelSymbols.innerHTML = `<span>${data.symbols[index]}</span>`;
+                    });
                     if (data.winnings > 0) {
                         resultText.textContent = `Você ganhou ${data.winnings} fichas!`;
                         resultText.style.color = 'var(--secondary-color)';
@@ -187,29 +184,16 @@
             }
         });
 
-        // ATUALIZAÇÃO: A função de animação agora recebe o símbolo final
-        function animateReel(reel, spins, finalSymbol) {
+        function animateReel(reel) {
+            const reelSymbols = reel.querySelector('.reel-symbols');
+            reelSymbols.style.transition = 'top 6s cubic-bezier(0.25, 1, 0.5, 1)';
             let symbolHtml = '';
-            // Gera os símbolos aleatórios que passarão durante a animação
-            for (let i = 0; i < spins * symbols.length; i++) {
+            const spinCount = 30;
+            for (let i = 0; i < spinCount; i++) {
                 symbolHtml += `<span>${symbols[Math.floor(Math.random() * symbols.length)]}</span>`;
             }
-            // Adiciona o símbolo final no final da lista
-            symbolHtml += `<span>${finalSymbol}</span>`;
-
-            const reelSymbols = reel.querySelector('.reel-symbols');
             reelSymbols.innerHTML = symbolHtml;
-            
-            // Define a transição para zero para resetar a posição instantaneamente
-            reelSymbols.style.transition = 'top 0s';
-            reelSymbols.style.top = '0px';
-
-            // Força o navegador a aplicar o reset antes de iniciar a animação
-            void reelSymbols.offsetWidth; 
-
-            // Define a transição de 6 segundos e calcula a posição final
-            reelSymbols.style.transition = 'top 6s cubic-bezier(0.25, 1, 0.5, 1)';
-            const finalPosition = (spins * symbols.length) * reel.clientHeight;
+            const finalPosition = (spinCount - 1) * reel.clientHeight;
             reelSymbols.style.top = `-${finalPosition}px`;
         }
 
@@ -218,16 +202,16 @@
             const modal = document.getElementById('buy-chips-modal');
             modal.style.display = 'flex';
             if(!modal.innerHTML.trim()){
-                modal.innerHTML = `<div class="modal-content"><span class="close-button" onclick="closeBuyChipsModal()">&times;</span><div id="chip-options-view"><h2>Comprar Fichas</h2><div class="chip-options"><div class="chip-option" onclick="selectChipPackage('pack_10', 5.00)"><strong>10 Fichas - R$ 5,00</strong></div><div class="chip-option" onclick="selectChipPackage('pack_25', 10.00)"><strong>25 Fichas - R$ 10,00</strong></div><div class="chip-option" onclick="selectChipPackage('pack_250', 50.00)"><strong>250 Fichas - R$ 50,00</strong></div></div></div><div id="email-prompt-view" style="display: none;"><h2>Quase lá!</h2><p>Em caso de vitória, entraremos em contato através desse e-mail.</p><input type="email" id="email-input" placeholder="seuemail@exemplo.com"><button id="generate-pix-btn" onclick="generatePix()"><strong>Comprar Fichas</strong></button></div><div id="pix-payment-view" style="display: none;"><h2>Pague com PIX</h2><img id="qr-code-image" src=""><p>Escaneie o QR Code para creditar suas fichas.</p><div id="pix-code-group" style="display:flex;margin:10px 0;"><input type="text" id="pix-code-input" readonly style="flex-grow:1;padding:10px;border:1px solid #777;background-color:#444;color:white;border-radius:5px 0 0 5px;"><button id="copy-pix-btn" onclick="copyPixCode()" style="padding:10px 15px;background-color:var(--primary-color);color:white;border:none;border-radius:0 5px 5px 0;cursor:pointer;font-weight:bold;">Copiar</button></div><p id="payment-status">Aguardando pagamento...</p></div></div>`;
+                modal.innerHTML = `<div class="modal-content"><span class="close-button" onclick="closeBuyChipsModal()">&times;</span><div id="chip-options-view"><h2>Comprar Fichas</h2><div class="chip-options"><div class="chip-option" onclick="selectChipPackage('pack_10', 5.00)"><strong>10 Fichas - R$ 5,00</strong></div><div class="chip-option" onclick="selectChipPackage('pack_25', 10.00)"><strong>25 Fichas - R$ 10,00</strong></div><div class="chip-option" onclick="selectChipPackage('pack_250', 50.00)"><strong>250 Fichas - R$ 50,00</strong></div></div></div><div id="email-prompt-view" style="display: none;"><h2>Quase lá!</h2><p>Em caso de vitória, entraremos em contato através desse e-mail.</p><input type="email" id="email-input" placeholder="seuemail@exemplo.com"><button id="generate-pix-btn" onclick="generatePix()"><strong>Comprar Fichas</strong></button></div><div id="pix-payment-view" style="display: none;"><h2>Pague com PIX</h2><p>Escaneie o QR Code abaixo:</p><img id="qr-code-image" src=""><p>Ou use o PIX Copia e Cola:</p><div id="pix-code-group" style="display:flex;margin:10px 0;"><input type="text" id="pix-code-input" readonly style="flex-grow:1;padding:10px;border:1px solid #777;background-color:#444;color:white;border-radius:5px 0 0 5px;"><button id="copy-pix-btn" onclick="copyPixCode()" style="padding:10px 15px;background-color:var(--primary-color);color:white;border:none;border-radius:0 5px 5px 0;cursor:pointer;font-weight:bold;">Copiar</button></div><p id="payment-status">Aguardando pagamento...</p></div></div>`;
             }
             document.getElementById('chip-options-view').style.display = 'block';
             document.getElementById('email-prompt-view').style.display = 'none';
             document.getElementById('pix-payment-view').style.display = 'none';
         }
+
         function closeBuyChipsModal() {
             document.getElementById('buy-chips-modal').style.display = 'none';
             if(paymentCheckInterval) clearInterval(paymentCheckInterval);
-            // ATUALIZAÇÃO: Garante que a música de fundo continue tocando
             if(isMusicPlaying && backgroundMusic.paused) {
                 backgroundMusic.play();
             }
