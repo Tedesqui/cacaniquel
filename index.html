@@ -177,35 +177,7 @@
             const modal = document.getElementById('buy-chips-modal');
             modal.style.display = 'flex';
             if(!modal.innerHTML.trim()){
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <span class="close-button" onclick="closeBuyChipsModal()">&times;</span>
-                        <div id="chip-options-view">
-                            <h2>Comprar Fichas</h2>
-                            <div class="chip-options">
-                                <div class="chip-option" onclick="selectChipPackage('pack_10', 5.00)"><strong>10 Fichas - R$ 5,00</strong></div>
-                                <div class="chip-option" onclick="selectChipPackage('pack_25', 10.00)"><strong>25 Fichas - R$ 10,00</strong></div>
-                                <div class="chip-option" onclick="selectChipPackage('pack_250', 50.00)"><strong>250 Fichas - R$ 50,00</strong></div>
-                            </div>
-                        </div>
-                        <div id="email-prompt-view" style="display: none;">
-                            <h2>Quase lá!</h2>
-                            <p>Em caso de vitória, entraremos em contato através desse e-mail.</p>
-                            <input type="email" id="email-input" placeholder="seuemail@exemplo.com">
-                            <button id="generate-pix-btn" onclick="generatePix()"><strong>Comprar Fichas</strong></button>
-                        </div>
-                        <div id="pix-payment-view" style="display: none;">
-                            <h2>Pague com PIX</h2>
-                            <p>Escaneie o QR Code abaixo:</p>
-                            <img id="qr-code-image" src="">
-                            <p>Ou use o PIX Copia e Cola:</p>
-                            <div id="pix-code-group" style="display:flex;margin:10px 0;">
-                                <input type="text" id="pix-code-input" readonly style="flex-grow:1;padding:10px;border:1px solid #777;background-color:#444;color:white;border-radius:5px 0 0 5px;">
-                                <button id="copy-pix-btn" onclick="copyPixCode()" style="padding:10px 15px;background-color:var(--primary-color);color:white;border:none;border-radius:0 5px 5px 0;cursor:pointer;font-weight:bold;">Copiar</button>
-                            </div>
-                            <p id="payment-status">Aguardando pagamento...</p>
-                        </div>
-                    </div>`;
+                modal.innerHTML = `<div class="modal-content"><span class="close-button" onclick="closeBuyChipsModal()">&times;</span><div id="chip-options-view"><h2>Comprar Fichas</h2><div class="chip-options"><div class="chip-option" onclick="selectChipPackage('pack_10', 5.00)"><strong>10 Fichas - R$ 5,00</strong></div><div class="chip-option" onclick="selectChipPackage('pack_25', 10.00)"><strong>25 Fichas - R$ 10,00</strong></div><div class="chip-option" onclick="selectChipPackage('pack_250', 50.00)"><strong>250 Fichas - R$ 50,00</strong></div></div></div><div id="email-prompt-view" style="display: none;"><h2>Quase lá!</h2><p>Em caso de vitória, entraremos em contato através desse e-mail.</p><input type="email" id="email-input" placeholder="seuemail@exemplo.com"><button id="generate-pix-btn" onclick="generatePix()"><strong>Comprar Fichas</strong></button></div><div id="pix-payment-view" style="display: none;"><h2>Pague com PIX</h2><p>Escaneie o QR Code abaixo:</p><img id="qr-code-image" src=""><p>Ou use o PIX Copia e Cola:</p><div id="pix-code-group" style="display:flex;margin:10px 0;"><input type="text" id="pix-code-input" readonly style="flex-grow:1;padding:10px;border:1px solid #777;background-color:#444;color:white;border-radius:5px 0 0 5px;"><button id="copy-pix-btn" onclick="copyPixCode()" style="padding:10px 15px;background-color:var(--primary-color);color:white;border:none;border-radius:0 5px 5px 0;cursor:pointer;font-weight:bold;">Copiar</button></div><p id="payment-status">Aguardando pagamento...</p></div></div>`;
             }
             document.getElementById('chip-options-view').style.display = 'block';
             document.getElementById('email-prompt-view').style.display = 'none';
