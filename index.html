@@ -9,27 +9,17 @@
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--dark-bg); color: var(--light-text); margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; }
         .header { text-align: center; margin-bottom: 20px; }
-        /* NOVO ESTILO PARA O SUBTÍTULO */
-        .subtitle {
-            color: var(--secondary-color);
-            font-size: 1.2em;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-top: -10px;
-        }
+        .subtitle { color: var(--secondary-color); font-size: 1.2em; font-weight: bold; text-transform: uppercase; margin-top: -10px; }
         .balance { background-color: #333; padding: 10px 20px; border-radius: 50px; font-size: 1.2em; font-weight: bold; }
         .balance span { color: var(--secondary-color); }
         .slot-machine { background: linear-gradient(145deg, #444, #222); border: 5px solid #a9a9a9; border-radius: 20px; padding: 20px; display: flex; gap: 15px; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.7); max-width: 100%; }
         .reel { width: clamp(70px, 20vw, 100px); height: clamp(70px, 20vw, 100px); background-color: #fff; border: 3px solid #333; border-radius: 10px; overflow: hidden; position: relative; }
         .reel-symbols { position: absolute; top: 0; left: 0; width: 100%; transition: top 1s cubic-bezier(0.33, 1, 0.68, 1); }
         .reel-symbols span { display: block; font-size: clamp(45px, 12vw, 70px); height: clamp(70px, 20vw, 100px); line-height: clamp(70px, 20vw, 100px); text-align: center; }
-        .controls { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 15px; }
-        .controls label { font-weight: bold; }
-        .controls input { width: 60px; padding: 10px; border-radius: 5px; border: none; text-align: center; font-size: 1em; }
-        .spin-button { padding: 15px 30px; font-size: 1.2em; font-weight: bold; color: #333; background-color: var(--secondary-color); border: none; border-radius: 10px; cursor: pointer; transition: transform 0.1s; }
+        .controls { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; } /* Aumentado o gap */
+        .spin-button { padding: 15px 40px; font-size: 1.5em; font-weight: bold; color: #333; background-color: var(--secondary-color); border: none; border-radius: 10px; cursor: pointer; transition: transform 0.1s; }
         .spin-button:active:not(:disabled) { transform: scale(0.95); }
         .spin-button:disabled { background-color: #555; cursor: not-allowed; }
-        /* BOTÃO DE COMPRAR FICHAS 50% MAIOR */
         .buy-chips-button { padding: 10px 20px; font-size: 1em; background-color: var(--primary-color); border-radius: 5px; border: none; color: white; cursor: pointer; transform: scale(1.5); }
         #result-text { margin-top: 20px; font-size: 1.2em; font-weight: bold; height: 30px; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
@@ -59,8 +49,6 @@
     </div>
 
     <div class="controls">
-        <label for="bet-amount">Aposta:</label>
-        <input type="number" id="bet-amount" value="1" min="1">
         <button class="spin-button" id="spin-btn">GIRAR</button>
         <button class="buy-chips-button" onclick="openBuyChipsModal()"><strong>Comprar Fichas</strong></button>
     </div>
@@ -84,7 +72,7 @@
                 <h2>Quase lá!</h2>
                 <p>Em caso de vitória, entraremos em contato através desse e-mail.</p>
                 <input type="email" id="email-input" placeholder="seuemail@exemplo.com">
-                <button id="generate-pix-btn" onclick="generatePix()">Gerar PIX</button>
+                <button id="generate-pix-btn" onclick="generatePix()"><strong>Comprar Fichas</strong></button>
             </div>
 
             <div id="pix-payment-view" style="display: none;">
@@ -98,7 +86,6 @@
 
     <script>
         const spinBtn = document.getElementById('spin-btn');
-        const betAmountInput = document.getElementById('bet-amount');
         const chipBalanceSpan = document.getElementById('chip-balance');
         const resultText = document.getElementById('result-text');
         const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
@@ -122,22 +109,30 @@
             chipBalanceSpan.textContent = newBalance;
         }
 
+        // LÓGICA DO GIRO ATUALIZADA
         spinBtn.addEventListener('click', async () => {
-            const betAmount = parseInt(betAmountInput.value, 10);
-            if (betAmount <= 0) { alert("A aposta deve ser de pelo menos 1 ficha."); return; }
+            const betAmount = 1; // Aposta fixada em 1
+
             spinBtn.disabled = true;
             resultText.textContent = "Girando...";
             reels.forEach(reel => animateReel(reel, 5));
+
             try {
-                const response = await fetch('/api/spin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ betAmount }), });
+                const response = await fetch('/api/spin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ betAmount }), // Envia a aposta fixa
+                });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
+
                 setTimeout(() => {
                     reels.forEach((reel, index) => { reel.querySelector('.reel-symbols').innerHTML = `<span>${data.symbols[index]}</span>`; reel.querySelector('.reel-symbols').style.top = '0px'; });
                     if (data.winnings > 0) { resultText.textContent = `Você ganhou ${data.winnings} fichas!`; resultText.style.color = 'var(--secondary-color)'; } else { resultText.textContent = "Tente Novamente!"; resultText.style.color = 'var(--light-text)'; }
                     updateBalance(data.newBalance);
                     spinBtn.disabled = false;
                 }, 1000);
+
             } catch (error) {
                 resultText.textContent = error.message;
                 resultText.style.color = 'red';
@@ -165,7 +160,6 @@
             if(paymentCheckInterval) clearInterval(paymentCheckInterval);
         }
         
-        // NOVA FUNÇÃO: Esconde os pacotes e mostra o campo de email
         function selectChipPackage(packageId, amount) {
             selectedPackageId = packageId;
             selectedAmount = amount;
