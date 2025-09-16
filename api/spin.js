@@ -25,7 +25,7 @@ export default async function handler(request, response) {
 
         currentBalance = await kv.decrby(userBalanceKey, betAmount);
 
-        // LÓGICA ANTI-VITÓRIA
+        // LÓGICA ANTI-VITÓRIA (GARANTE QUE NUNCA SAIA 3 IGUAIS)
         let s1 = symbols[Math.floor(Math.random() * symbols.length)];
         let s2 = symbols[Math.floor(Math.random() * symbols.length)];
         let s3 = symbols[Math.floor(Math.random() * symbols.length)];
