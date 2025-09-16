@@ -14,24 +14,26 @@
         .balance span { color: var(--secondary-color); }
         .slot-machine { background: linear-gradient(145deg, #444, #222); border: 5px solid #a9a9a9; border-radius: 20px; padding: 20px; display: flex; gap: 15px; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.7); max-width: 100%; }
         .reel { width: clamp(70px, 20vw, 100px); height: clamp(70px, 20vw, 100px); background-color: #fff; border: 3px solid #333; border-radius: 10px; overflow: hidden; position: relative; }
-        .reel-symbols { position: absolute; top: 0; left: 0; width: 100%; transition: top 1s cubic-bezier(0.33, 1, 0.68, 1); }
+        .reel-symbols { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            /* DURAÇÃO DA ANIMAÇÃO ALTERADA PARA 6 SEGUNDOS */
+            transition: top 6s cubic-bezier(0.25, 1, 0.5, 1); 
+        }
         .reel-symbols span { display: block; font-size: clamp(45px, 12vw, 70px); height: clamp(70px, 20vw, 100px); line-height: clamp(70px, 20vw, 100px); text-align: center; }
         .controls { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
         .spin-button { padding: 15px 40px; font-size: 1.5em; font-weight: bold; color: #333; background-color: var(--secondary-color); border: none; border-radius: 10px; cursor: pointer; transition: transform 0.1s; order: 1; }
         .spin-button:active:not(:disabled) { transform: scale(0.95); }
         .spin-button:disabled { background-color: #555; cursor: not-allowed; }
         .buy-chips-button { padding: 10px 20px; font-size: 1em; background-color: var(--primary-color); border-radius: 5px; border: none; color: white; cursor: pointer; transform: scale(1.5); order: 2; }
-        
-        /* ANIMAÇÃO ALTERADA: agora tem uma contagem de iterações */
-        .pulsating-button {
-            animation: pulse-button 2s 5; /* Duração de 2s, 5 vezes */
-        }
+        .pulsating-button { animation: pulse-button 2s 5; }
         @keyframes pulse-button {
             0% { box-shadow: 0 0 0 0 rgba(171, 71, 188, 0.7); }
             70% { box-shadow: 0 0 0 12px rgba(171, 71, 188, 0); }
             100% { box-shadow: 0 0 0 0 rgba(171, 71, 188, 0); }
         }
-
         #result-text { margin-top: 20px; font-size: 1.2em; font-weight: bold; height: 30px; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background-color: #333; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; }
@@ -95,6 +97,7 @@
     <audio id="spin-sound" src="/sounds/spin.mp3" preload="auto"></audio>
     <audio id="win-sound" src="/sounds/win.mp3" preload="auto"></audio>
     <audio id="buy-chips-sound" src="/sounds/buy-chips.mp3" preload="auto"></audio>
+    <audio id="background-music" src="/sounds/background-music.mp3" preload="auto" loop></audio>
 
     <script>
         const spinBtn = document.getElementById('spin-btn');
@@ -104,31 +107,25 @@
         const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
         const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
         
-        // Referências para os áudios
         const spinSound = document.getElementById('spin-sound');
         const winSound = document.getElementById('win-sound');
         const buyChipsSound = document.getElementById('buy-chips-sound');
+        const backgroundMusic = document.getElementById('background-music');
 
         let currentPaymentId, paymentCheckInterval;
         let selectedPackageId, selectedAmount;
+        let isMusicPlaying = false;
 
-        // NOVA FUNÇÃO: Controla a animação pulsante
         function triggerPulseAnimation() {
-            // Remove a classe para reiniciar a animação se ela já estiver acontecendo
             buyChipsBtn.classList.remove('pulsating-button');
-            // Força o navegador a refazer o layout, necessário para reiniciar a animação
             void buyChipsBtn.offsetWidth;
-            // Adiciona a classe para começar a pulsar
             buyChipsBtn.classList.add('pulsating-button');
-
-            // Remove a classe após a animação terminar (2s * 5 = 10s)
             setTimeout(() => {
                 buyChipsBtn.classList.remove('pulsating-button');
             }, 10000);
         }
 
         window.onload = async () => {
-            // Pulsa o botão assim que a página carrega
             triggerPulseAnimation();
             try {
                 const response = await fetch('/api/session');
@@ -143,37 +140,43 @@
 
         function updateBalance(newBalance) {
             chipBalanceSpan.textContent = newBalance;
-            // Se o saldo chegar a zero, pulsa o botão de comprar
             if (parseInt(newBalance, 10) === 0) {
                 triggerPulseAnimation();
             }
         }
 
         spinBtn.addEventListener('click', async () => {
+            if (!isMusicPlaying) {
+                backgroundMusic.volume = 0.3;
+                backgroundMusic.play().catch(e => console.error("Música de fundo bloqueada pelo navegador."));
+                isMusicPlaying = true;
+            }
+
             const betAmount = 1;
             spinBtn.disabled = true;
             resultText.textContent = "Girando...";
-            reels.forEach(reel => animateReel(reel, 5));
-            spinSound.play(); // Toca o som de giro
+            reels.forEach(reel => animateReel(reel, 15)); // Aumentado o número de giros para preencher o tempo
+            spinSound.play();
 
             try {
                 const response = await fetch('/api/spin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ betAmount }), });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
                 
+                // TEMPO DE ESPERA ALTERADO PARA 6 SEGUNDOS
                 setTimeout(() => {
                     reels.forEach((reel, index) => { reel.querySelector('.reel-symbols').innerHTML = `<span>${data.symbols[index]}</span>`; reel.querySelector('.reel-symbols').style.top = '0px'; });
                     if (data.winnings > 0) {
                         resultText.textContent = `Você ganhou ${data.winnings} fichas!`;
                         resultText.style.color = 'var(--secondary-color)';
-                        winSound.play(); // Toca o som de vitória
+                        winSound.play();
                     } else {
                         resultText.textContent = "Tente Novamente!";
                         resultText.style.color = 'var(--light-text)';
                     }
                     updateBalance(data.newBalance);
                     spinBtn.disabled = false;
-                }, 1000);
+                }, 6000); // 6000 milissegundos = 6 segundos
             } catch (error) {
                 resultText.textContent = error.message;
                 resultText.style.color = 'red';
@@ -191,7 +194,7 @@
         }
 
         function openBuyChipsModal() {
-            buyChipsSound.play(); // Toca o som do botão de compra
+            buyChipsSound.play();
             document.getElementById('buy-chips-modal').style.display = 'flex';
             document.getElementById('chip-options-view').style.display = 'block';
             document.getElementById('email-prompt-view').style.display = 'none';
@@ -222,11 +225,7 @@
             document.getElementById('payment-status').textContent = "Gerando PIX...";
 
             try {
-                const response = await fetch('/api/create-payment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ packageId: selectedPackageId, amount: selectedAmount, email: email }),
-                });
+                const response = await fetch('/api/create-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ packageId: selectedPackageId, amount: selectedAmount, email: email }), });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
                 
