@@ -1,0 +1,12 @@
+{
+  "name": "caca-niquel-virtual",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vercel/kv": "^2.0.0",
+    "cookie": "^0.6.0",
+    "mercadopago": "^2.0.0",
+    "uuid": "^10.0.0"
+  }
+}
