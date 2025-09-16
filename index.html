@@ -6,30 +6,112 @@
     <title>Caça-Níquel Virtual</title>
     <style>
         :root { --primary-color: #6a1b9a; --secondary-color: #ffc107; --dark-bg: #121212; --light-text: #fff; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--dark-bg); color: var(--light-text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .balance { background-color: #333; padding: 10px 20px; border-radius: 50px; font-size: 1.2em; font-weight: bold; }
+        
+        /* Otimizações Gerais */
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--dark-bg); 
+            color: var(--light-text); 
+            margin: 0; 
+            padding: 20px 10px; /* Reduzido o padding lateral */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        
+        .header { 
+            text-align: center; 
+            margin-bottom: 20px;
+        }
+        
+        .balance { 
+            background-color: #333; 
+            padding: 10px 20px; 
+            border-radius: 50px; 
+            font-size: 1.2em; 
+            font-weight: bold; 
+        }
         .balance span { color: var(--secondary-color); }
-        .slot-machine { background: linear-gradient(145deg, #444, #222); border: 5px solid #a9a9a9; border-radius: 20px; padding: 30px; display: flex; gap: 20px; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.7); }
-        .reel { width: 100px; height: 100px; background-color: #fff; border: 3px solid #333; border-radius: 10px; overflow: hidden; position: relative; }
-        .reel-symbols { position: absolute; top: 0; left: 0; width: 100%; transition: top 1s cubic-bezier(0.33, 1, 0.68, 1); }
-        .reel-symbols span { display: block; font-size: 70px; height: 100px; line-height: 100px; text-align: center; }
-        .controls { margin-top: 30px; display: flex; align-items: center; gap: 15px; }
+        
+        .slot-machine { 
+            background: linear-gradient(145deg, #444, #222); 
+            border: 5px solid #a9a9a9; 
+            border-radius: 20px; 
+            padding: 20px; /* Reduzido o padding */
+            display: flex; 
+            gap: 15px; /* Reduzido o espaçamento */
+            justify-content: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.7);
+            max-width: 100%; /* Garante que não ultrapasse a tela */
+        }
+        
+        .reel { 
+            width: clamp(70px, 20vw, 100px); /* Tamanho flexível */
+            height: clamp(70px, 20vw, 100px); /* Tamanho flexível */
+            background-color: #fff; 
+            border: 3px solid #333; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            position: relative; 
+        }
+        
+        .reel-symbols { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            transition: top 1s cubic-bezier(0.33, 1, 0.68, 1); 
+        }
+        
+        .reel-symbols span { 
+            display: block; 
+            font-size: clamp(45px, 12vw, 70px); /* Fonte flexível */
+            height: clamp(70px, 20vw, 100px); /* Altura flexível */
+            line-height: clamp(70px, 20vw, 100px); /* Altura da linha flexível */
+            text-align: center; 
+        }
+        
+        .controls { 
+            margin-top: 30px; 
+            display: flex; 
+            flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas pequenas */
+            justify-content: center; /* Centraliza os botões */
+            align-items: center; 
+            gap: 15px; 
+        }
+        
         .controls label { font-weight: bold; }
         .controls input { width: 60px; padding: 10px; border-radius: 5px; border: none; text-align: center; font-size: 1em; }
-        .spin-button { padding: 15px 40px; font-size: 1.5em; font-weight: bold; color: #333; background-color: var(--secondary-color); border: none; border-radius: 10px; cursor: pointer; transition: transform 0.1s; }
+        
+        .spin-button { 
+            padding: 15px 30px; /* Reduzido o padding */
+            font-size: 1.2em; /* Reduzido o tamanho da fonte */
+            font-weight: bold; 
+            color: #333; 
+            background-color: var(--secondary-color); 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: transform 0.1s; 
+        }
+        
         .spin-button:active:not(:disabled) { transform: scale(0.95); }
         .spin-button:disabled { background-color: #555; cursor: not-allowed; }
+        
         .buy-chips-button { padding: 10px 20px; font-size: 1em; background-color: var(--primary-color); border-radius: 5px; border: none; color: white; cursor: pointer; }
-        #result-text { margin-top: 20px; font-size: 1.5em; font-weight: bold; height: 30px; }
+        
+        #result-text { margin-top: 20px; font-size: 1.2em; font-weight: bold; height: 30px; }
+        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background-color: #333; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; }
+        .modal-content { background-color: #333; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; }
         .close-button { float: right; font-size: 28px; cursor: pointer; }
         .chip-options { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; }
-        .chip-option { background-color: var(--primary-color); padding: 15px; border-radius: 10px; cursor: pointer; font-size: 1.2em; transition: background-color 0.2s; }
+        .chip-option { background-color: var(--primary-color); padding: 15px; border-radius: 10px; cursor: pointer; font-size: 1.1em; transition: background-color 0.2s; }
         .chip-option:hover { background-color: #8e44ad; }
         #pix-payment-view p { color: #ccc; }
-        #qr-code-image { border: 4px solid white; border-radius: 8px; max-width: 250px; }
+        #qr-code-image { border: 4px solid white; border-radius: 8px; max-width: 100%; height: auto; } /* QR code responsivo */
     </style>
 </head>
 <body>
@@ -84,16 +166,16 @@
         let currentPaymentId;
         let paymentCheckInterval;
 
-        // CARREGA O SALDO INICIAL DO SERVIDOR
+        // ATUALIZAÇÃO: Lógica de erro aprimorada
         window.onload = async () => {
             try {
                 const response = await fetch('/api/session');
                 const data = await response.json();
-                if (response.ok) {
-                    updateBalance(data.chipBalance);
-                }
+                if (!response.ok) throw new Error("Falha na rede");
+                updateBalance(data.chipBalance);
             } catch (error) {
-                chipBalanceSpan.textContent = "Erro";
+                console.error("Erro ao carregar saldo:", error);
+                chipBalanceSpan.innerHTML = `Erro. <button onclick="window.location.reload()" style="font-size: 0.7em; margin-left: 5px;">Recarregar</button>`;
             }
         };
 
@@ -101,7 +183,6 @@
             chipBalanceSpan.textContent = newBalance;
         }
 
-        // LÓGICA DO GIRO
         spinBtn.addEventListener('click', async () => {
             const betAmount = parseInt(betAmountInput.value, 10);
             if (betAmount <= 0) {
@@ -111,8 +192,6 @@
 
             spinBtn.disabled = true;
             resultText.textContent = "Girando...";
-            
-            // ANIMAÇÃO INICIAL
             reels.forEach(reel => animateReel(reel, 5));
 
             try {
@@ -122,16 +201,13 @@
                     body: JSON.stringify({ betAmount }),
                 });
                 const data = await response.json();
-
                 if (!response.ok) throw new Error(data.error);
 
-                // ANIMAÇÃO FINAL COM O RESULTADO DO SERVIDOR
                 setTimeout(() => {
                     reels.forEach((reel, index) => {
                         reel.querySelector('.reel-symbols').innerHTML = `<span>${data.symbols[index]}</span>`;
                         reel.querySelector('.reel-symbols').style.top = '0px';
                     });
-
                     if (data.winnings > 0) {
                         resultText.textContent = `Você ganhou ${data.winnings} fichas!`;
                         resultText.style.color = 'var(--secondary-color)';
@@ -139,10 +215,9 @@
                         resultText.textContent = "Tente Novamente!";
                         resultText.style.color = 'var(--light-text)';
                     }
-
                     updateBalance(data.newBalance);
                     spinBtn.disabled = false;
-                }, 1000); // Espera 1s pela animação
+                }, 1000);
 
             } catch (error) {
                 resultText.textContent = error.message;
@@ -158,11 +233,10 @@
             }
             const reelSymbols = reel.querySelector('.reel-symbols');
             reelSymbols.innerHTML = symbolHtml;
-            const finalPosition = (spins * symbols.length - 1) * 100;
+            const finalPosition = (spins * symbols.length - 1) * reel.clientHeight; // Usa a altura real do elemento
             reelSymbols.style.top = `-${finalPosition}px`;
         }
 
-        // LÓGICA DE PAGAMENTO
         function openBuyChipsModal() {
             document.getElementById('buy-chips-modal').style.display = 'flex';
             document.getElementById('chip-options-view').style.display = 'block';
