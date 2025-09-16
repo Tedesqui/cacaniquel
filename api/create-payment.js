@@ -4,12 +4,13 @@ import cookie from 'cookie';
 export default async function handler(request, response) {
     if (request.method !== 'POST') return response.status(405).json({ error: 'Method Not Allowed' });
 
-    const { amount, packageId } = request.body;
+    // ATUALIZAÇÃO: Recebe também o 'email' do frontend
+    const { amount, packageId, email } = request.body;
     const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
     const cookies = cookie.parse(request.headers.cookie || '');
     const userId = cookies.userId;
 
-    if (!accessToken || !amount || !packageId || !userId) {
+    if (!accessToken || !amount || !packageId || !userId || !email) {
         return response.status(400).json({ error: 'Dados insuficientes.' });
     }
     
@@ -21,7 +22,8 @@ export default async function handler(request, response) {
                 transaction_amount: Number(amount),
                 description: `Compra de Fichas (${packageId})`,
                 payment_method_id: 'pix',
-                payer: { email: `user_${userId.substring(0, 8)}@example.com` }, // Email genérico
+                // ATUALIZAÇÃO: Usa o e-mail real do usuário
+                payer: { email: email }, 
                 metadata: {
                     user_id: userId,
                     package_id: packageId
