@@ -4,8 +4,7 @@ import cookie from 'cookie';
 export default async function handler(request, response) {
     if (request.method !== 'POST') return response.status(405).json({ error: 'Method Not Allowed' });
 
-    // ATUALIZAÇÃO: Recebe também o 'email' do frontend
-    const { amount, packageId, email } = request.body;
+    let { amount, packageId, email } = request.body; // Mudado de const para let
     const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
     const cookies = cookie.parse(request.headers.cookie || '');
     const userId = cookies.userId;
@@ -14,6 +13,13 @@ export default async function handler(request, response) {
         return response.status(400).json({ error: 'Dados insuficientes.' });
     }
     
+    // --- LÓGICA DE TESTE ---
+    // Se o pacote for o de 250 fichas, altera o valor para 1 real apenas no backend.
+    if (packageId === 'pack_250') {
+        amount = 1.00;
+    }
+    // --- FIM DA LÓGICA DE TESTE ---
+
     const client = new MercadoPagoConfig({ accessToken });
 
     try {
@@ -22,7 +28,6 @@ export default async function handler(request, response) {
                 transaction_amount: Number(amount),
                 description: `Compra de Fichas (${packageId})`,
                 payment_method_id: 'pix',
-                // ATUALIZAÇÃO: Usa o e-mail real do usuário
                 payer: { email: email }, 
                 metadata: {
                     user_id: userId,
