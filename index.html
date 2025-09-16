@@ -13,9 +13,9 @@
         .balance { background-color: #333; padding: 10px 20px; border-radius: 50px; font-size: 1.2em; font-weight: bold; }
         .balance span { color: var(--secondary-color); }
         .slot-machine { background: linear-gradient(145deg, #444, #222); border: 5px solid #a9a9a9; border-radius: 20px; padding: 20px; display: flex; gap: 15px; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.7); max-width: 100%; }
-        .reel { width: clamp(70px, 20vw, 100px); height: clamp(70px, 20vw, 100px); background-color: #fff; border: 3px solid #333; border-radius: 10px; overflow: hidden; position: relative; }
-        .reel-symbols { position: absolute; top: 0; left: 0; width: 100%; /* A transição será controlada pelo JS */ }
-        .reel-symbols span { display: block; font-size: clamp(45px, 12vw, 70px); height: clamp(70px, 20vw, 100px); line-height: clamp(70px, 20vw, 100px); text-align: center; }
+        .reel { width: 100px; height: 100px; background-color: #fff; border: 3px solid #333; border-radius: 10px; overflow: hidden; position: relative; }
+        .reel-symbols { position: absolute; top: 0; left: 0; width: 100%; }
+        .reel-symbols span { display: block; font-size: 70px; height: 100px; line-height: 100px; text-align: center; }
         .controls { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
         .spin-button { padding: 15px 40px; font-size: 1.5em; font-weight: bold; color: #333; background-color: var(--secondary-color); border: none; border-radius: 10px; cursor: pointer; transition: transform 0.1s; order: 1; }
         .spin-button:active:not(:disabled) { transform: scale(0.95); }
@@ -29,7 +29,6 @@
         .close-button { float: right; font-size: 28px; cursor: pointer; }
         .chip-options { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; }
         .chip-option { background-color: var(--primary-color); padding: 15px; border-radius: 10px; cursor: pointer; font-size: 1.1em; transition: background-color 0.2s; }
-        .chip-option:hover { background-color: #8e44ad; }
         #pix-payment-view p, #email-prompt-view p { color: #ccc; }
         #email-input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #777; background-color: #444; color: white; text-align: center; margin-bottom: 15px; }
         #generate-pix-btn { width: 100%; padding: 12px; font-size: 1em; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
@@ -50,6 +49,7 @@
     <audio id="win-sound" src="/sounds/win.mp3" preload="auto"></audio>
     <audio id="buy-chips-sound" src="/sounds/buy-chips.mp3" preload="auto"></audio>
     <audio id="background-music" src="/sounds/background-music.mp3" preload="auto" loop></audio>
+
     <script>
         const spinBtn = document.getElementById('spin-btn');
         const buyChipsBtn = document.getElementById('buy-chips-btn');
@@ -61,9 +61,57 @@
         const winSound = document.getElementById('win-sound');
         const buyChipsSound = document.getElementById('buy-chips-sound');
         const backgroundMusic = document.getElementById('background-music');
+        let currentPaymentId, paymentCheckInterval, selectedPackageId, selectedAmount;
         let isMusicPlaying = false;
 
-        // --- LÓGICA DE ANIMAÇÃO E GIRO (REESCRITA PARA CORREÇÃO) ---
+        const startOverlay = document.getElementById('start-overlay');
+        startOverlay.addEventListener('click', () => {
+            startOverlay.style.display = 'none';
+            if (!isMusicPlaying) {
+                backgroundMusic.volume = 0.3;
+                backgroundMusic.play().catch(e => console.error("Música de fundo bloqueada pelo navegador."));
+                isMusicPlaying = true;
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!isMusicPlaying) return;
+            if (document.visibilityState === 'hidden') {
+                backgroundMusic.pause();
+            } else {
+                backgroundMusic.play();
+            }
+        });
+
+        function triggerPulseAnimation() {
+            buyChipsBtn.classList.remove('pulsating-button');
+            void buyChipsBtn.offsetWidth;
+            buyChipsBtn.classList.add('pulsating-button');
+            setTimeout(() => {
+                buyChipsBtn.classList.remove('pulsating-button');
+            }, 10000);
+        }
+
+        window.onload = async () => {
+            triggerPulseAnimation();
+            try {
+                const response = await fetch('/api/session');
+                const data = await response.json();
+                if (!response.ok) throw new Error("Falha na rede");
+                updateBalance(data.chipBalance);
+            } catch (error) {
+                console.error("Erro ao carregar saldo:", error);
+                chipBalanceSpan.innerHTML = `Erro. <button onclick="window.location.reload()" style="font-size: 0.7em; margin-left: 5px;">Recarregar</button>`;
+            }
+        };
+
+        function updateBalance(newBalance) {
+            chipBalanceSpan.textContent = newBalance;
+            if (parseInt(newBalance, 10) === 0) {
+                triggerPulseAnimation();
+            }
+        }
+
         spinBtn.addEventListener('click', async () => {
             const betAmount = 1;
             const currentBalance = parseInt(chipBalanceSpan.textContent, 10);
@@ -80,28 +128,19 @@
             spinBtn.disabled = true;
             resultText.textContent = "Girando...";
             resultText.style.color = 'var(--light-text)';
-            
-            // Inicia a animação em todos os reels
             reels.forEach(reel => animateReel(reel));
             spinSound.play();
-
             try {
-                // Enquanto a animação roda, busca o resultado no servidor
                 const response = await fetch('/api/spin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ betAmount }), });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
-                
-                // Espera a animação de 6s terminar
                 setTimeout(() => {
-                    // Trava o resultado final no lugar, sem flash branco
                     reels.forEach((reel, index) => {
                         const reelSymbols = reel.querySelector('.reel-symbols');
-                        reelSymbols.style.transition = 'none'; // Desliga a animação suave
-                        reelSymbols.innerHTML = `<span>${data.symbols[index]}</span>`; // Coloca o símbolo final
-                        reelSymbols.style.top = '0px'; // Reseta a posição para alinhamento perfeito
+                        reelSymbols.style.transition = 'none';
+                        reelSymbols.innerHTML = `<span>${data.symbols[index]}</span>`;
+                        reelSymbols.style.top = '0px';
                     });
-                    
-                    // Mostra o resultado (ganhou/perdeu)
                     if (data.winnings > 0) {
                         resultText.textContent = `Você ganhou ${data.winnings} fichas!`;
                         resultText.style.color = 'var(--secondary-color)';
@@ -112,8 +151,7 @@
                     }
                     updateBalance(data.newBalance);
                     spinBtn.disabled = false;
-                }, 6000); // 6000ms = 6 segundos
-
+                }, 6000);
             } catch (error) {
                 resultText.textContent = error.message;
                 resultText.style.color = 'red';
@@ -121,35 +159,124 @@
             }
         });
 
-        // Animação simplificada: Apenas gira uma tira de símbolos aleatórios
         function animateReel(reel) {
             const reelSymbols = reel.querySelector('.reel-symbols');
-            reelSymbols.style.transition = 'top 6s cubic-bezier(0.33, 1, 0.68, 1)'; // Define a duração e suavização
-            
+            reelSymbols.style.transition = 'top 6s cubic-bezier(0.25, 1, 0.5, 1)';
             let symbolHtml = '';
-            const spinCount = 40; // Aumenta o número de símbolos para um giro mais longo
+            const spinCount = 40;
             for (let i = 0; i < spinCount; i++) {
                 symbolHtml += `<span>${symbols[Math.floor(Math.random() * symbols.length)]}</span>`;
             }
             reelSymbols.innerHTML = symbolHtml;
-            
-            // Calcula a posição final para parar no último símbolo da tira animada
-            const finalPosition = (spinCount - 1) * reel.clientHeight;
+            const finalPosition = (spinCount - 1) * 100;
             reelSymbols.style.top = `-${finalPosition}px`;
         }
 
-        // --- Funções restantes (sem alterações) ---
-        const startOverlay = document.getElementById('start-overlay'); startOverlay.addEventListener('click', () => { startOverlay.style.display = 'none'; if (!isMusicPlaying) { backgroundMusic.volume = 0.3; backgroundMusic.play().catch(e => console.error("Música de fundo bloqueada pelo navegador.")); isMusicPlaying = true; } });
-        document.addEventListener('visibilitychange', () => { if (!isMusicPlaying) return; if (document.visibilityState === 'hidden') { backgroundMusic.pause(); } else { backgroundMusic.play(); } });
-        function triggerPulseAnimation() { buyChipsBtn.classList.remove('pulsating-button'); void buyChipsBtn.offsetWidth; buyChipsBtn.classList.add('pulsating-button'); setTimeout(() => { buyChipsBtn.classList.remove('pulsating-button'); }, 10000); }
-        window.onload = async () => { triggerPulseAnimation(); try { const response = await fetch('/api/session'); const data = await response.json(); if (!response.ok) throw new Error("Falha na rede"); updateBalance(data.chipBalance); } catch (error) { console.error("Erro ao carregar saldo:", error); chipBalanceSpan.innerHTML = `Erro. <button onclick="window.location.reload()" style="font-size: 0.7em; margin-left: 5px;">Recarregar</button>`; } };
-        function updateBalance(newBalance) { chipBalanceSpan.textContent = newBalance; if (parseInt(newBalance, 10) === 0) { triggerPulseAnimation(); } }
-        function openBuyChipsModal() { buyChipsSound.play(); const modal = document.getElementById('buy-chips-modal'); modal.style.display = 'flex'; if(!modal.innerHTML.trim()){ modal.innerHTML = `<div class="modal-content"><span class="close-button" onclick="closeBuyChipsModal()">&times;</span><div id="chip-options-view"><h2>Comprar Fichas</h2><div class="chip-options"><div class="chip-option" onclick="selectChipPackage('pack_10', 5.00)"><strong>10 Fichas - R$ 5,00</strong></div><div class="chip-option" onclick="selectChipPackage('pack_25', 10.00)"><strong>25 Fichas - R$ 10,00</strong></div><div class="chip-option" onclick="selectChipPackage('pack_250', 50.00)"><strong>250 Fichas - R$ 50,00</strong></div></div></div><div id="email-prompt-view" style="display: none;"><h2>Quase lá!</h2><p>Em caso de vitória, entraremos em contato através desse e-mail.</p><input type="email" id="email-input" placeholder="seuemail@exemplo.com"><button id="generate-pix-btn" onclick="generatePix()"><strong>Comprar Fichas</strong></button></div><div id="pix-payment-view" style="display: none;"><h2>Pague com PIX</h2><p>Escaneie o QR Code abaixo:</p><img id="qr-code-image" src=""><p>Ou use o PIX Copia e Cola:</p><div id="pix-code-group" style="display:flex;margin:10px 0;"><input type="text" id="pix-code-input" readonly style="flex-grow:1;padding:10px;border:1px solid #777;background-color:#444;color:white;border-radius:5px 0 0 5px;"><button id="copy-pix-btn" onclick="copyPixCode()" style="padding:10px 15px;background-color:var(--primary-color);color:white;border:none;border-radius:0 5px 5px 0;cursor:pointer;font-weight:bold;">Copiar</button></div><p id="payment-status">Aguardando pagamento...</p></div></div>`;} document.getElementById('chip-options-view').style.display = 'block'; document.getElementById('email-prompt-view').style.display = 'none'; document.getElementById('pix-payment-view').style.display = 'none'; }
-        function closeBuyChipsModal() { document.getElementById('buy-chips-modal').style.display = 'none'; if(paymentCheckInterval) clearInterval(paymentCheckInterval); if(isMusicPlaying && backgroundMusic.paused) { backgroundMusic.play(); } }
-        function selectChipPackage(packageId, amount) { selectedPackageId = packageId; selectedAmount = amount; document.getElementById('chip-options-view').style.display = 'none'; document.getElementById('email-prompt-view').style.display = 'block'; }
-        async function generatePix() { const emailInput = document.getElementById('email-input'); const email = emailInput.value; if (!email || !/^\S+@\S+\.\S+$/.test(email)) { alert("Por favor, insira um e-mail válido."); return; } document.getElementById('email-prompt-view').style.display = 'none'; document.getElementById('pix-payment-view').style.display = 'block'; document.getElementById('payment-status').textContent = "Gerando PIX..."; try { const response = await fetch('/api/create-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ packageId: selectedPackageId, amount: selectedAmount, email: email }), }); const data = await response.json(); if (!response.ok) throw new Error(data.error); document.getElementById('qr-code-image').src = `data:image/png;base64,${data.qrCodeBase64}`; document.getElementById('pix-code-input').value = data.qrCode; currentPaymentId = data.paymentId; startPaymentCheck(currentPaymentId); } catch(error) { document.getElementById('payment-status').textContent = error.message; } }
-        function copyPixCode() { const input = document.getElementById('pix-code-input'); const button = document.getElementById('copy-pix-btn'); input.select(); navigator.clipboard.writeText(input.value); button.textContent = 'Copiado!'; setTimeout(() => { button.textContent = 'Copiar'; }, 2000); }
-        function startPaymentCheck(paymentId) { document.getElementById('payment-status').textContent = 'Aguardando pagamento...'; if (paymentCheckInterval) clearInterval(paymentCheckInterval); paymentCheckInterval = setInterval(async () => { try { const response = await fetch(`/api/check-payment?paymentId=${paymentId}`); const data = await response.json(); if (data.status === 'approved') { clearInterval(paymentCheckInterval); document.getElementById('payment-status').textContent = 'Pagamento aprovado! Fichas creditadas.'; updateBalance(data.newBalance); setTimeout(closeBuyChipsModal, 2000); } } catch(error) { console.error("Erro ao verificar pagamento"); } }, 5000); }
+        function openBuyChipsModal() {
+            buyChipsSound.play();
+            const modal = document.getElementById('buy-chips-modal');
+            modal.style.display = 'flex';
+            if(!modal.innerHTML.trim()){
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="close-button" onclick="closeBuyChipsModal()">&times;</span>
+                        <div id="chip-options-view">
+                            <h2>Comprar Fichas</h2>
+                            <div class="chip-options">
+                                <div class="chip-option" onclick="selectChipPackage('pack_10', 5.00)"><strong>10 Fichas - R$ 5,00</strong></div>
+                                <div class="chip-option" onclick="selectChipPackage('pack_25', 10.00)"><strong>25 Fichas - R$ 10,00</strong></div>
+                                <div class="chip-option" onclick="selectChipPackage('pack_250', 50.00)"><strong>250 Fichas - R$ 50,00</strong></div>
+                            </div>
+                        </div>
+                        <div id="email-prompt-view" style="display: none;">
+                            <h2>Quase lá!</h2>
+                            <p>Em caso de vitória, entraremos em contato através desse e-mail.</p>
+                            <input type="email" id="email-input" placeholder="seuemail@exemplo.com">
+                            <button id="generate-pix-btn" onclick="generatePix()"><strong>Comprar Fichas</strong></button>
+                        </div>
+                        <div id="pix-payment-view" style="display: none;">
+                            <h2>Pague com PIX</h2>
+                            <p>Escaneie o QR Code abaixo:</p>
+                            <img id="qr-code-image" src="">
+                            <p>Ou use o PIX Copia e Cola:</p>
+                            <div id="pix-code-group" style="display:flex;margin:10px 0;">
+                                <input type="text" id="pix-code-input" readonly style="flex-grow:1;padding:10px;border:1px solid #777;background-color:#444;color:white;border-radius:5px 0 0 5px;">
+                                <button id="copy-pix-btn" onclick="copyPixCode()" style="padding:10px 15px;background-color:var(--primary-color);color:white;border:none;border-radius:0 5px 5px 0;cursor:pointer;font-weight:bold;">Copiar</button>
+                            </div>
+                            <p id="payment-status">Aguardando pagamento...</p>
+                        </div>
+                    </div>`;
+            }
+            document.getElementById('chip-options-view').style.display = 'block';
+            document.getElementById('email-prompt-view').style.display = 'none';
+            document.getElementById('pix-payment-view').style.display = 'none';
+        }
+
+        function closeBuyChipsModal() {
+            document.getElementById('buy-chips-modal').style.display = 'none';
+            if(paymentCheckInterval) clearInterval(paymentCheckInterval);
+            if(isMusicPlaying && backgroundMusic.paused) {
+                backgroundMusic.play();
+            }
+        }
+        
+        function selectChipPackage(packageId, amount) {
+            selectedPackageId = packageId;
+            selectedAmount = amount;
+            document.getElementById('chip-options-view').style.display = 'none';
+            document.getElementById('email-prompt-view').style.display = 'block';
+        }
+
+        async function generatePix() {
+            const emailInput = document.getElementById('email-input');
+            const email = emailInput.value;
+            if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+                alert("Por favor, insira um e-mail válido.");
+                return;
+            }
+            document.getElementById('email-prompt-view').style.display = 'none';
+            document.getElementById('pix-payment-view').style.display = 'block';
+            document.getElementById('payment-status').textContent = "Gerando PIX...";
+            try {
+                const response = await fetch('/api/create-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ packageId: selectedPackageId, amount: selectedAmount, email: email }), });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                document.getElementById('qr-code-image').src = `data:image/png;base64,${data.qrCodeBase64}`;
+                document.getElementById('pix-code-input').value = data.qrCode;
+                currentPaymentId = data.paymentId;
+                startPaymentCheck(currentPaymentId);
+            } catch(error) {
+                document.getElementById('payment-status').textContent = error.message;
+            }
+        }
+        
+        function copyPixCode() {
+            const input = document.getElementById('pix-code-input');
+            const button = document.getElementById('copy-pix-btn');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            button.textContent = 'Copiado!';
+            setTimeout(() => { button.textContent = 'Copiar'; }, 2000);
+        }
+
+        function startPaymentCheck(paymentId) {
+            document.getElementById('payment-status').textContent = 'Aguardando pagamento...';
+            if (paymentCheckInterval) clearInterval(paymentCheckInterval);
+            paymentCheckInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/check-payment?paymentId=${paymentId}`);
+                    const data = await response.json();
+                    if (data.status === 'approved') {
+                        clearInterval(paymentCheckInterval);
+                        document.getElementById('payment-status').textContent = 'Pagamento aprovado! Fichas creditadas.';
+                        updateBalance(data.newBalance);
+                        setTimeout(closeBuyChipsModal, 2000);
+                    }
+                } catch(error) {
+                    console.error("Erro ao verificar pagamento");
+                }
+            }, 5000);
+        }
     </script>
 </body>
 </html>
