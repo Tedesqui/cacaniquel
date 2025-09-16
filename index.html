@@ -16,11 +16,43 @@
         .reel { width: clamp(70px, 20vw, 100px); height: clamp(70px, 20vw, 100px); background-color: #fff; border: 3px solid #333; border-radius: 10px; overflow: hidden; position: relative; }
         .reel-symbols { position: absolute; top: 0; left: 0; width: 100%; transition: top 1s cubic-bezier(0.33, 1, 0.68, 1); }
         .reel-symbols span { display: block; font-size: clamp(45px, 12vw, 70px); height: clamp(70px, 20vw, 100px); line-height: clamp(70px, 20vw, 100px); text-align: center; }
-        .controls { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; } /* Aumentado o gap */
-        .spin-button { padding: 15px 40px; font-size: 1.5em; font-weight: bold; color: #333; background-color: var(--secondary-color); border: none; border-radius: 10px; cursor: pointer; transition: transform 0.1s; }
+        
+        /* CONTROLES ATUALIZADOS */
+        .controls { 
+            margin-top: 30px; 
+            display: flex; 
+            flex-direction: column; /* Deixa os itens em coluna */
+            align-items: center; /* Centraliza na coluna */
+            gap: 20px; /* Espaçamento de 20px entre os botões */
+        }
+        
+        .spin-button { 
+            padding: 15px 40px; 
+            font-size: 1.5em; 
+            font-weight: bold; 
+            color: #333; 
+            background-color: var(--secondary-color); 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: transform 0.1s; 
+            order: 1; /* Garante que ele venha primeiro */
+        }
         .spin-button:active:not(:disabled) { transform: scale(0.95); }
         .spin-button:disabled { background-color: #555; cursor: not-allowed; }
-        .buy-chips-button { padding: 10px 20px; font-size: 1em; background-color: var(--primary-color); border-radius: 5px; border: none; color: white; cursor: pointer; transform: scale(1.5); }
+        
+        .buy-chips-button { 
+            padding: 10px 20px; 
+            font-size: 1em; 
+            background-color: var(--primary-color); 
+            border-radius: 5px; 
+            border: none; 
+            color: white; 
+            cursor: pointer; 
+            transform: scale(1.5); 
+            order: 2; /* Garante que ele venha em segundo */
+        }
+
         #result-text { margin-top: 20px; font-size: 1.2em; font-weight: bold; height: 30px; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background-color: #333; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; }
@@ -58,7 +90,6 @@
     <div class="modal-overlay" id="buy-chips-modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeBuyChipsModal()">&times;</span>
-            
             <div id="chip-options-view">
                 <h2>Comprar Fichas</h2>
                 <div class="chip-options">
@@ -67,14 +98,12 @@
                     <div class="chip-option" onclick="selectChipPackage('pack_100', 25.00)">100 Fichas - R$ 25,00</div>
                 </div>
             </div>
-
             <div id="email-prompt-view" style="display: none;">
                 <h2>Quase lá!</h2>
                 <p>Em caso de vitória, entraremos em contato através desse e-mail.</p>
                 <input type="email" id="email-input" placeholder="seuemail@exemplo.com">
                 <button id="generate-pix-btn" onclick="generatePix()"><strong>Comprar Fichas</strong></button>
             </div>
-
             <div id="pix-payment-view" style="display: none;">
                 <h2>Pague com PIX</h2>
                 <img id="qr-code-image" src="">
@@ -109,30 +138,25 @@
             chipBalanceSpan.textContent = newBalance;
         }
 
-        // LÓGICA DO GIRO ATUALIZADA
         spinBtn.addEventListener('click', async () => {
-            const betAmount = 1; // Aposta fixada em 1
-
+            const betAmount = 1;
             spinBtn.disabled = true;
             resultText.textContent = "Girando...";
             reels.forEach(reel => animateReel(reel, 5));
-
             try {
                 const response = await fetch('/api/spin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ betAmount }), // Envia a aposta fixa
+                    body: JSON.stringify({ betAmount }),
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
-
                 setTimeout(() => {
                     reels.forEach((reel, index) => { reel.querySelector('.reel-symbols').innerHTML = `<span>${data.symbols[index]}</span>`; reel.querySelector('.reel-symbols').style.top = '0px'; });
                     if (data.winnings > 0) { resultText.textContent = `Você ganhou ${data.winnings} fichas!`; resultText.style.color = 'var(--secondary-color)'; } else { resultText.textContent = "Tente Novamente!"; resultText.style.color = 'var(--light-text)'; }
                     updateBalance(data.newBalance);
                     spinBtn.disabled = false;
                 }, 1000);
-
             } catch (error) {
                 resultText.textContent = error.message;
                 resultText.style.color = 'red';
