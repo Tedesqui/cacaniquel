@@ -4,7 +4,8 @@ import { kv } from '@vercel/kv';
 const packages = {
     'pack_10': 10,
     'pack_25': 25,
-    'pack_100': 100
+    'pack_100': 100,
+    'pack_250': 250 // ADICIONADO
 };
 
 export default async function handler(request, response) {
@@ -24,11 +25,10 @@ export default async function handler(request, response) {
             
             if (chipsToAdd > 0) {
                 const userBalanceKey = `user:${user_id}:chips`;
-                // Verifica se o pagamento já foi processado
                 const processed = await kv.get(`payment:${paymentId}:processed`);
                 if (!processed) {
                     const newBalance = await kv.incrby(userBalanceKey, chipsToAdd);
-                    await kv.set(`payment:${paymentId}:processed`, true, { ex: 86400 }); // Marca como processado
+                    await kv.set(`payment:${paymentId}:processed`, true, { ex: 86400 }); 
                     return response.status(200).json({ status: 'approved', newBalance });
                 }
             }
