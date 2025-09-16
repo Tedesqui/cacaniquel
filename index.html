@@ -21,15 +21,17 @@
         .spin-button:active:not(:disabled) { transform: scale(0.95); }
         .spin-button:disabled { background-color: #555; cursor: not-allowed; }
         .buy-chips-button { padding: 10px 20px; font-size: 1em; background-color: var(--primary-color); border-radius: 5px; border: none; color: white; cursor: pointer; transform: scale(1.5); order: 2; }
-        /* ANIMAÇÃO PULSANTE PARA O BOTÃO */
+        
+        /* ANIMAÇÃO ALTERADA: agora tem uma contagem de iterações */
         .pulsating-button {
-            animation: pulse-button 2s infinite;
+            animation: pulse-button 2s 5; /* Duração de 2s, 5 vezes */
         }
         @keyframes pulse-button {
             0% { box-shadow: 0 0 0 0 rgba(171, 71, 188, 0.7); }
             70% { box-shadow: 0 0 0 12px rgba(171, 71, 188, 0); }
             100% { box-shadow: 0 0 0 0 rgba(171, 71, 188, 0); }
         }
+
         #result-text { margin-top: 20px; font-size: 1.2em; font-weight: bold; height: 30px; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background-color: #333; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; }
@@ -59,7 +61,7 @@
 
     <div class="controls">
         <button class="spin-button" id="spin-btn">GIRAR</button>
-        <button class="buy-chips-button pulsating-button" onclick="openBuyChipsModal()"><strong>Comprar Fichas</strong></button>
+        <button class="buy-chips-button" id="buy-chips-btn" onclick="openBuyChipsModal()"><strong>Comprar Fichas</strong></button>
     </div>
     
     <div id="result-text">Boa Sorte!</div>
@@ -89,17 +91,45 @@
             </div>
         </div>
     </div>
+    
+    <audio id="spin-sound" src="/sounds/spin.mp3" preload="auto"></audio>
+    <audio id="win-sound" src="/sounds/win.mp3" preload="auto"></audio>
+    <audio id="buy-chips-sound" src="/sounds/buy-chips.mp3" preload="auto"></audio>
 
     <script>
         const spinBtn = document.getElementById('spin-btn');
+        const buyChipsBtn = document.getElementById('buy-chips-btn');
         const chipBalanceSpan = document.getElementById('chip-balance');
         const resultText = document.getElementById('result-text');
         const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
         const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+        
+        // Referências para os áudios
+        const spinSound = document.getElementById('spin-sound');
+        const winSound = document.getElementById('win-sound');
+        const buyChipsSound = document.getElementById('buy-chips-sound');
+
         let currentPaymentId, paymentCheckInterval;
         let selectedPackageId, selectedAmount;
 
+        // NOVA FUNÇÃO: Controla a animação pulsante
+        function triggerPulseAnimation() {
+            // Remove a classe para reiniciar a animação se ela já estiver acontecendo
+            buyChipsBtn.classList.remove('pulsating-button');
+            // Força o navegador a refazer o layout, necessário para reiniciar a animação
+            void buyChipsBtn.offsetWidth;
+            // Adiciona a classe para começar a pulsar
+            buyChipsBtn.classList.add('pulsating-button');
+
+            // Remove a classe após a animação terminar (2s * 5 = 10s)
+            setTimeout(() => {
+                buyChipsBtn.classList.remove('pulsating-button');
+            }, 10000);
+        }
+
         window.onload = async () => {
+            // Pulsa o botão assim que a página carrega
+            triggerPulseAnimation();
             try {
                 const response = await fetch('/api/session');
                 const data = await response.json();
@@ -113,6 +143,10 @@
 
         function updateBalance(newBalance) {
             chipBalanceSpan.textContent = newBalance;
+            // Se o saldo chegar a zero, pulsa o botão de comprar
+            if (parseInt(newBalance, 10) === 0) {
+                triggerPulseAnimation();
+            }
         }
 
         spinBtn.addEventListener('click', async () => {
@@ -120,17 +154,23 @@
             spinBtn.disabled = true;
             resultText.textContent = "Girando...";
             reels.forEach(reel => animateReel(reel, 5));
+            spinSound.play(); // Toca o som de giro
+
             try {
-                const response = await fetch('/api/spin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ betAmount }),
-                });
+                const response = await fetch('/api/spin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ betAmount }), });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
+                
                 setTimeout(() => {
                     reels.forEach((reel, index) => { reel.querySelector('.reel-symbols').innerHTML = `<span>${data.symbols[index]}</span>`; reel.querySelector('.reel-symbols').style.top = '0px'; });
-                    if (data.winnings > 0) { resultText.textContent = `Você ganhou ${data.winnings} fichas!`; resultText.style.color = 'var(--secondary-color)'; } else { resultText.textContent = "Tente Novamente!"; resultText.style.color = 'var(--light-text)'; }
+                    if (data.winnings > 0) {
+                        resultText.textContent = `Você ganhou ${data.winnings} fichas!`;
+                        resultText.style.color = 'var(--secondary-color)';
+                        winSound.play(); // Toca o som de vitória
+                    } else {
+                        resultText.textContent = "Tente Novamente!";
+                        resultText.style.color = 'var(--light-text)';
+                    }
                     updateBalance(data.newBalance);
                     spinBtn.disabled = false;
                 }, 1000);
@@ -151,6 +191,7 @@
         }
 
         function openBuyChipsModal() {
+            buyChipsSound.play(); // Toca o som do botão de compra
             document.getElementById('buy-chips-modal').style.display = 'flex';
             document.getElementById('chip-options-view').style.display = 'block';
             document.getElementById('email-prompt-view').style.display = 'none';
