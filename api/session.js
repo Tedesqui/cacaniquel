@@ -20,9 +20,9 @@ export default async function handler(request, response) {
     const userBalanceKey = `user:${userId}:chips`;
     let chipBalance = await kv.get(userBalanceKey);
     
-    // Se o usuário é novo, damos 10 fichas de bônus
+    // ATUALIZAÇÃO: Novos usuários agora recebem 3 fichas
     if (chipBalance === null) {
-        chipBalance = 10;
+        chipBalance = 3;
         await kv.set(userBalanceKey, chipBalance);
     }
     
