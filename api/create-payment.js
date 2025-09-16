@@ -4,7 +4,7 @@ import cookie from 'cookie';
 export default async function handler(request, response) {
     if (request.method !== 'POST') return response.status(405).json({ error: 'Method Not Allowed' });
 
-    let { amount, packageId, email } = request.body; // Mudado de const para let
+    let { amount, packageId, email } = request.body;
     const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
     const cookies = cookie.parse(request.headers.cookie || '');
     const userId = cookies.userId;
@@ -13,12 +13,9 @@ export default async function handler(request, response) {
         return response.status(400).json({ error: 'Dados insuficientes.' });
     }
     
-    // --- LÓGICA DE TESTE ---
-    // Se o pacote for o de 250 fichas, altera o valor para 1 real apenas no backend.
     if (packageId === 'pack_250') {
         amount = 1.00;
     }
-    // --- FIM DA LÓGICA DE TESTE ---
 
     const client = new MercadoPagoConfig({ accessToken });
 
@@ -36,9 +33,13 @@ export default async function handler(request, response) {
             }
         });
         
+        const pixData = payment.point_of_interaction.transaction_data;
+        
         response.status(201).json({ 
             paymentId: payment.id,
-            qrCodeBase64: payment.point_of_interaction.transaction_data.qr_code_base64,
+            qrCodeBase64: pixData.qr_code_base64,
+            // ATUALIZAÇÃO: Adicionado o código de texto do PIX na resposta
+            qrCode: pixData.qr_code 
         });
 
     } catch (error) {
