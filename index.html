@@ -8,7 +8,7 @@
     <style>
         :root { --primary-color: #6a1b9a; --secondary-color: #ffc107; --dark-bg: #121212; --light-text: #fff; }
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--dark-bg); color: var-light-text; margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--dark-bg); color: var(--light-text); margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; }
         .header { text-align: center; margin-bottom: 20px; }
         .subtitle { color: var(--secondary-color); font-size: 1.2em; font-weight: bold; text-transform: uppercase; margin-top: -10px; }
         .balance { background-color: #333; padding: 10px 20px; border-radius: 50px; font-size: 1.2em; font-weight: bold; }
@@ -34,6 +34,7 @@
         .submit-btn { width: 100%; padding: 12px; font-size: 1em; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
         #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--dark-bg); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
         #start-overlay h1 { font-size: 2em; color: var(--secondary-color); }
+        #start-overlay p { font-size: 1.2em; }
         /* Estilos para o formulário do Stripe */
         #payment-element { margin-bottom: 20px; }
     </style>
@@ -214,11 +215,21 @@
             }
         });
 
+        // --- CORREÇÃO AQUI: LÓGICA PARA PAUSAR A MÚSICA EM SEGUNDO PLANO ---
+        document.addEventListener('visibilitychange', () => {
+            if (!isMusicPlaying) return; // Não faz nada se a música nunca começou
+            if (document.visibilityState === 'hidden') {
+                backgroundMusic.pause();
+            } else {
+                backgroundMusic.play().catch(() => {}); // Tenta tocar de novo quando a aba fica visível
+            }
+        });
+
         function updateBalance(newBalance) {
             chipBalanceSpan.textContent = newBalance;
         }
 
-        // --------------- LÓGICA DO JOGO (SPIN) - SEM ALTERAÇÕES SIGNIFICATIVAS ---------------
+        // --------------- LÓGICA DO JOGO (SPIN) ---------------
         spinBtn.addEventListener('click', async () => {
             const betAmount = 1;
             const currentBalance = parseInt(chipBalanceSpan.textContent, 10);
@@ -275,7 +286,7 @@
             });
         }
         
-        // --------------- LÓGICA DE COMPRA DE FICHAS (NOVA E ADAPTÁVEL) ---------------
+        // --------------- LÓGICA DE COMPRA DE FICHAS ---------------
         document.getElementById('buy-chips-btn').onclick = () => {
             buyChipsSound.play();
             const modal = document.getElementById('buy-chips-modal');
@@ -322,7 +333,6 @@
             if (localeConfig.paymentGateway === 'Stripe') {
                 await setupStripeForm(packageId, email);
             } else {
-                // Lógica antiga do PIX (MercadoPago)
                 await generatePix(packageId, amount, email);
             }
         }
@@ -330,7 +340,7 @@
         // --- LÓGICA DO STRIPE ---
         async function setupStripeForm(packageId, email) {
             const modalContent = document.querySelector('#buy-chips-modal .modal-content');
-            modalContent.innerHTML = '<h2>Loading...</h2>'; // Feedback visual
+            modalContent.innerHTML = '<h2>Loading...</h2>'; 
 
             const response = await fetch('/api/create-stripe-payment', {
                 method: 'POST',
@@ -369,10 +379,9 @@
                 document.getElementById('stripe-submit-btn').disabled = true;
                 document.getElementById('stripe-submit-btn').textContent = t('processing');
 
-                const { error } = await stripe.confirmPayment({
+                const { error, paymentIntent } = await stripe.confirmPayment({
                     elements,
-                    confirmParams: { return_url: window.location.href },
-                    redirect: 'if_required' // Evita redirecionamento
+                    redirect: 'if_required'
                 });
 
                 if (error) {
@@ -380,14 +389,10 @@
                     document.getElementById('stripe-submit-btn').disabled = false;
                     document.getElementById('stripe-submit-btn').textContent = t('pay', {amount: payAmount});
                 } else {
-                    // Pagamento pode ter sido bem-sucedido, vamos verificar no servidor
-                    const clientSecretParts = clientSecret.split('_secret_');
-                    const paymentIntentId = clientSecretParts[0];
-
                     const verifyResponse = await fetch('/api/verify-stripe-payment', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentIntentId })
+                        body: JSON.stringify({ paymentIntentId: paymentIntent.id })
                     });
                     const verifyData = await verifyResponse.json();
                     if(verifyData.success) {
@@ -401,23 +406,50 @@
             });
         }
 
-        // --- LÓGICA DO PIX (MERCADO PAGO) - adaptada para o novo fluxo ---
+        // --- LÓGICA DO PIX (MERCADO PAGO) ---
         async function generatePix(packageId, amount, email) {
             const modalContent = document.querySelector('#buy-chips-modal .modal-content');
             modalContent.innerHTML = `<h2>${t('generatingPix')}...</h2>`;
             
-            // Aqui você chamaria a sua API antiga de PIX
-            // Exemplo:
-            // const response = await fetch('/api/create-payment', { ... });
-            // const data = await response.json();
-            // ... e então mostraria o QR Code.
-            // Esta parte precisa ser adaptada da sua lógica original.
-            modalContent.innerHTML = `
+            // Esta parte deve conter a sua lógica original para gerar o PIX
+            // O código abaixo é apenas um exemplo de como seria a estrutura
+            try {
+                const response = await fetch('/api/create-payment', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ packageId: packageId, amount: amount, email: email }), 
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+
+                modalContent.innerHTML = `
                 <div class="modal-content">
                     <span class="close-button" onclick="closeBuyChipsModal()">&times;</span>
                     <h2>${t('payWithPix')}</h2>
-                    <p>Lógica do PIX seria exibida aqui.</p>
+                    <p>${t('scanQrCode')}</p>
+                    <img id="qr-code-image" src="data:image/png;base64,${data.qrCodeBase64}" style="border: 4px solid white; border-radius: 8px; max-width: 100%; height: auto;">
+                    <p>${t('orUseCopyPaste')}</p>
+                    <div style="display:flex;margin:10px 0;">
+                        <input type="text" id="pix-code-input" readonly value="${data.qrCode}" style="flex-grow:1;padding:10px;border:1px solid #777;background-color:#444;color:white;border-radius:5px 0 0 5px;">
+                        <button id="copy-pix-btn" onclick="copyPixCode()" style="padding:10px 15px;background-color:var(--primary-color);color:white;border:none;border-radius:0 5px 5px 0;cursor:pointer;font-weight:bold;">${t('copy')}</button>
+                    </div>
+                    <p id="payment-status">${t('waitingPayment')}</p>
                 </div>`;
+                
+                // Iniciar a verificação do pagamento PIX (função não mostrada, assumindo que você a tenha)
+                // startPaymentCheck(data.paymentId); 
+            } catch(error) {
+                 modalContent.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        function copyPixCode() {
+            const input = document.getElementById('pix-code-input');
+            const button = document.getElementById('copy-pix-btn');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            button.textContent = t('copied');
+            setTimeout(() => { button.textContent = t('copy'); }, 2000);
         }
 
     </script>
