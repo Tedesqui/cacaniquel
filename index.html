@@ -49,6 +49,17 @@
         /* Estilos para o formulário do Stripe */
         #payment-element { margin-bottom: 20px; }
         .submit-btn { width: 100%; padding: 12px; font-size: 1em; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        
+        /* CSS da Animação de Piscar */
+        .blinking-text {
+            animation: blink-animation 1.5s infinite;
+        }
+
+        @keyframes blink-animation {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -484,13 +495,16 @@
             
             document.getElementById('email-prompt-view').style.display = 'none';
             document.getElementById('pix-payment-view').style.display = 'block';
-            document.getElementById('payment-status').textContent = t('generatingPix');
+            
+            const paymentStatusEl = document.getElementById('payment-status');
+            paymentStatusEl.textContent = t('generatingPix');
+            paymentStatusEl.classList.remove('blinking-text');
+
 
             try {
                 const response = await fetch('/api/create-payment', { 
                     method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    // ATENÇÃO: Enviando apenas o que o novo backend precisa
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         packageId: selectedPackageId, 
                         email: email 
@@ -501,11 +515,15 @@
 
                 document.getElementById('qr-code-image').src = `data:image/png;base64,${data.qrCodeBase64}`;
                 document.getElementById('pix-code-input').value = data.qrCode;
-                document.getElementById('payment-status').textContent = t('waitingPayment');
+                
+                paymentStatusEl.textContent = t('waitingPayment');
+                paymentStatusEl.classList.add('blinking-text');
+
                 currentPaymentId = data.paymentId;
                 startPaymentCheck(currentPaymentId);
             } catch(error) {
-                document.getElementById('payment-status').textContent = `Erro: ${error.message}`;
+                paymentStatusEl.textContent = `Erro: ${error.message}`;
+                paymentStatusEl.classList.remove('blinking-text');
             }
         }
         
@@ -526,7 +544,10 @@
                     const data = await response.json();
                     if (data.status === 'approved') {
                         clearInterval(paymentCheckInterval);
-                        document.getElementById('payment-status').textContent = t('paymentApproved');
+                        const paymentStatusEl = document.getElementById('payment-status');
+                        paymentStatusEl.textContent = t('paymentApproved');
+                        paymentStatusEl.classList.remove('blinking-text');
+                        
                         updateBalance(data.newBalance);
                         setTimeout(closeBuyChipsModal, 2000);
                     }
