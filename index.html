@@ -52,7 +52,7 @@
         
         /* CSS da Animação de Piscar */
         .blinking-text {
-            animation: blink-animation 3.00s infinite;
+            animation: blink-animation 2.25s infinite;
         }
 
         @keyframes blink-animation {
@@ -273,7 +273,7 @@
                     { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 رقاقة - $5.00' },
                     { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 رقاقة - $10.00' },
                 ],
-                translations: { mainTitle: "🎰 ماكينة القمار الافتراضية 🎰", title: "ماكينة القمار الافتراضية", welcome: "أهلاً بك!", clickToStart: "انقر في أي مكان للبدء", subtitle: "اربح <strong>20.000 DOLLARS</strong> إذا طابقت جميع الرموز الثلاثة!!!", balance: "الرصيد", chips: "رقائق", spin: "تدوير", buyChips: "شراء رقائق", goodLuck: "حظاً موفقاً!", insufficientChips: "لا توجد رقائق كافية!", spinning: "جارٍ التدوير...", tryAgain: "حاول مرة أخرى!", youWon: "لقد فزت بـ {amount} من الرقائق!", buyChipsTitle: "شراء رقائق", almostThere: "أوشكت على الانتهاء!", emailInfo: "أدخل بريدك الإلكتروني أدناه. إذا فزت، سنتصل بك عبر بريدك الإلكتروني:", payWithCard: "الدفع بالبطاقة", cardInfo: "أدخل تفاصيل بطاقتك أدناه.", pay: "ادفع {amount}", processing: "قيد المعالجة...", paymentSuccessful: "تم الدفع بنجاح!", enterValidEmail: "الرجاء إدخال بريد إلكتروني صالح.", error_generic: "حدث خطأ", error_api_keys: "يرجى التحقق من تكوين الخادم." }
+                translations: { mainTitle: "🎰 ماكينة القمار الافتراضية 🎰", title: "माكينة القمار الافتراضية", welcome: "أهلاً بك!", clickToStart: "انقر في أي مكان للبدء", subtitle: "اربح <strong>20.000 DOLLARS</strong> إذا طابقت جميع الرموز الثلاثة!!!", balance: "الرصيد", chips: "رقائق", spin: "تدوير", buyChips: "شراء رقائق", goodLuck: "حظاً موفقاً!", insufficientChips: "لا توجد رقائق كافية!", spinning: "جارٍ التدوير...", tryAgain: "حاول مرة أخرى!", youWon: "لقد فزت بـ {amount} من الرقائق!", buyChipsTitle: "شراء رقائق", almostThere: "أوشكت على الانتهاء!", emailInfo: "أدخل بريدك الإلكتروني أدناه. إذا فزت، سنتصل بك عبر بريدك الإلكتروني:", payWithCard: "الدفع بالبطاقة", cardInfo: "أدخل تفاصيل بطاقتك أدناه.", pay: "ادفع {amount}", processing: "قيد المعالجة...", paymentSuccessful: "تم الدفع بنجاح!", enterValidEmail: "الرجاء إدخال بريد إلكتروني صالح.", error_generic: "حدث خطأ", error_api_keys: "يرجى التحقق من تكوين الخادم." }
             },
             'he': {
                 paymentGateway: 'Stripe', lang: 'he-IL', currency: '$',
@@ -319,12 +319,6 @@
                 console.error("Error loading balance:", error);
                 chipBalanceSpan.innerHTML = `Error. <button onclick="window.location.reload()" style="font-size: 0.7em; margin-left: 5px;">Reload</button>`;
             }
-
-            const buyChipsBtn = document.getElementById('buy-chips-btn');
-            buyChipsBtn.classList.add('pulsating-button');
-            setTimeout(() => {
-                buyChipsBtn.classList.remove('pulsating-button');
-            }, 10000);
         };
 
         const startOverlay = document.getElementById('start-overlay');
@@ -335,6 +329,12 @@
                 backgroundMusic.play().catch(e => console.error("Background music blocked by browser."));
                 isMusicPlaying = true;
             }
+
+            const buyChipsBtn = document.getElementById('buy-chips-btn');
+            buyChipsBtn.classList.add('pulsating-button');
+            setTimeout(() => {
+                buyChipsBtn.classList.remove('pulsating-button');
+            }, 5000);
         });
         
         document.addEventListener('visibilitychange', () => {
@@ -365,7 +365,7 @@
 
                 setTimeout(() => {
                     buyChipsBtn.classList.remove('pulsating-button');
-                }, 10000);
+                }, 5000);
 
                 return;
             }
