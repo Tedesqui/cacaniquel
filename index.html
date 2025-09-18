@@ -93,7 +93,7 @@
         let localeConfig; 
         let currentPaymentId, paymentCheckInterval, selectedPackageId, selectedAmount;
 
-        // --------------- DICIONÁRIO DE TRADUÇÕES E CONFIGURAÇÕES ---------------
+        // --------------- DICIONÁRIO DE TRADUÇÕES E CONFIGURAÇÕES (COM PREÇOS ATUALIZADOS) ---------------
         const locales = {
             'pt': {
                 paymentGateway: 'MercadoPago',
@@ -120,17 +120,29 @@
             },
             'en': {
                 paymentGateway: 'Stripe', lang: 'en-US', currency: '$',
-                packages: [ { id: 'pack_10_usd', chips: 10, price: 1.00, display: '10 Chips - $1.00' }, { id: 'pack_25_usd', chips: 25, price: 2.00, display: '25 Chips - $2.00' }, { id: 'pack_250_usd', chips: 250, price: 10.00, display: '250 Chips - $10.00' },],
+                packages: [ 
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Chips - $3.00' }, 
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Chips - $5.00' }, 
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Chips - $10.00' },
+                ],
                 translations: { title: "Virtual Slot Machine", welcome: "Welcome!", clickToStart: "Click anywhere to start", subtitle: "Win 1,000 if you match all 3 symbols!!!", balance: "BALANCE", chips: "CHIPS", spin: "SPIN", buyChips: "Buy Chips", goodLuck: "Good Luck!", insufficientChips: "Not enough chips!", spinning: "Spinning...", tryAgain: "Try Again!", youWon: "You won {amount} chips!", buyChipsTitle: "Buy Chips", almostThere: "Almost there!", emailInfo: "We will contact you via this email if you win.", payWithCard: "Pay with Card", cardInfo: "Enter your card details below.", pay: "Pay {amount}", processing: "Processing...", paymentSuccessful: "Payment successful!", enterValidEmail: "Please enter a valid email.", error_generic: "An error occurred", error_api_keys: "Please check the server configuration." }
             },
             'es': {
                 paymentGateway: 'Stripe', lang: 'es-ES', currency: '$',
-                packages: [ { id: 'pack_10_usd', chips: 10, price: 1.00, display: '10 Fichas - $1.00' }, { id: 'pack_25_usd', chips: 25, price: 2.00, display: '25 Fichas - $2.00' }, { id: 'pack_250_usd', chips: 250, price: 10.00, display: '250 Fichas - $10.00' }, ],
+                packages: [ 
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Fichas - $3.00' }, 
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Fichas - $5.00' }, 
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Fichas - $10.00' }, 
+                ],
                 translations: { title: "Tragamonedas Virtual", welcome: "¡Bienvenido!", clickToStart: "Haga clic en cualquier lugar para comenzar", subtitle: "¡Gana 1,000 si aciertas los 3 símbolos!", balance: "SALDO", chips: "FICHAS", spin: "GIRAR", buyChips: "Comprar Fichas", goodLuck: "¡Buena Suerte!", insufficientChips: "¡No hay suficientes fichas!", spinning: "Girando...", tryAgain: "¡Inténtalo de Nuevo!", youWon: "¡Has ganado {amount} fichas!", buyChipsTitle: "Comprar Fichas", almostThere: "¡Casi listo!", emailInfo: "Te contactaremos a través de este correo si ganas.", payWithCard: "Pagar con Tarjeta", cardInfo: "Introduce los datos de tu tarjeta a continuación.", pay: "Pagar {amount}", processing: "Procesando...", paymentSuccessful: "¡Pago exitoso!", enterValidEmail: "Por favor, introduce un email válido.", error_generic: "Ocurrió un error", error_api_keys: "Por favor, compruebe la configuración del servidor." }
             },
             'fr': {
-                paymentGateway: 'Stripe', lang: 'fr-FR', currency: '$',
-                packages: [ { id: 'pack_10_usd', chips: 10, price: 1.00, display: '10 Jetons - $1.00' }, { id: 'pack_25_usd', chips: 25, price: 2.00, display: '25 Jetons - $2.00' }, { id: 'pack_250_usd', chips: 250, price: 10.00, display: '250 Jetons - $10.00' }, ],
+                paymentGateway: 'Stripe', lang: 'fr-FR', currency: '€',
+                packages: [ 
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Jetons - $3.00' }, 
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Jetons - $5.00' }, 
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Jetons - $10.00' }, 
+                ],
                 translations: { title: "Machine à Sous Virtuelle", welcome: "Bienvenue !", clickToStart: "Cliquez n'importe où pour commencer", subtitle: "Gagnez 1 000 si vous obtenez les 3 symboles !!!", balance: "SOLDE", chips: "JETONS", spin: "TOURNER", buyChips: "Acheter des Jetons", goodLuck: "Bonne Chance !", insufficientChips: "Jetons insuffisants !", spinning: "Rotation...", tryAgain: "Réessayez !", youWon: "Vous avez gagné {amount} jetons !", buyChipsTitle: "Acheter des Jetons", almostThere: "Presque là !", emailInfo: "Nous vous contacterons par cet e-mail si vous gagnez.", payWithCard: "Payer par Carte", cardInfo: "Entrez les détails de votre carte ci-dessous.", pay: "Payer {amount}", processing: "Traitement...", paymentSuccessful: "Paiement réussi !", enterValidEmail: "Veuillez saisir un e-mail valide.", error_generic: "Une erreur est survenue", error_api_keys: "Veuillez vérifier la configuration du serveur." }
             }
         };
