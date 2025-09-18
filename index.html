@@ -93,9 +93,9 @@
         let localeConfig; 
         let currentPaymentId, paymentCheckInterval, selectedPackageId, selectedAmount;
 
-        // --------------- DICIONÁRIO DE TRADUÇÕES E CONFIGURAÇÕES (COM PREÇOS ATUALIZADOS) ---------------
+        // --------------- DICIONÁRIO DE TRADUÇÕES E CONFIGURAÇÕES ---------------
         const locales = {
-            'pt': {
+            'pt-br': {
                 paymentGateway: 'MercadoPago',
                 lang: 'pt-BR',
                 currency: 'R$',
@@ -136,14 +136,131 @@
                 ],
                 translations: { title: "Tragamonedas Virtual", welcome: "¡Bienvenido!", clickToStart: "Haga clic en cualquier lugar para comenzar", subtitle: "¡Gana 1,000 si aciertas los 3 símbolos!", balance: "SALDO", chips: "FICHAS", spin: "GIRAR", buyChips: "Comprar Fichas", goodLuck: "¡Buena Suerte!", insufficientChips: "¡No hay suficientes fichas!", spinning: "Girando...", tryAgain: "¡Inténtalo de Nuevo!", youWon: "¡Has ganado {amount} fichas!", buyChipsTitle: "Comprar Fichas", almostThere: "¡Casi listo!", emailInfo: "Te contactaremos a través de este correo si ganas.", payWithCard: "Pagar con Tarjeta", cardInfo: "Introduce los datos de tu tarjeta a continuación.", pay: "Pagar {amount}", processing: "Procesando...", paymentSuccessful: "¡Pago exitoso!", enterValidEmail: "Por favor, introduce un email válido.", error_generic: "Ocurrió un error", error_api_keys: "Por favor, compruebe la configuración del servidor." }
             },
+            'it': {
+                paymentGateway: 'Stripe', lang: 'it-IT', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Gettoni - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Gettoni - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Gettoni - $10.00' },
+                ],
+                translations: { title: "Slot Machine Virtuale", welcome: "Benvenuto!", clickToStart: "Clicca ovunque per iniziare", subtitle: "Vinci 1.000 se allinei 3 simboli!!!", balance: "SALDO", chips: "GETTONI", spin: "GIRA", buyChips: "Compra Gettoni", goodLuck: "Buona Fortuna!", insufficientChips: "Gettoni insufficienti!", spinning: "Girando...", tryAgain: "Riprova!", youWon: "Hai vinto {amount} gettoni!", buyChipsTitle: "Compra Gettoni", almostThere: "Quasi fatto!", emailInfo: "Ti contatteremo tramite questa email in caso di vittoria.", payWithCard: "Paga con Carta", cardInfo: "Inserisci i dati della tua carta qui sotto.", pay: "Paga {amount}", processing: "In elaborazione...", paymentSuccessful: "Pagamento riuscito!", enterValidEmail: "Per favore, inserisci un'email valida.", error_generic: "Si è verificato un errore", error_api_keys: "Per favore, controlla la configurazione del server." }
+            },
             'fr': {
-                paymentGateway: 'Stripe', lang: 'fr-FR', currency: '€',
+                paymentGateway: 'Stripe', lang: 'fr-FR', currency: '$',
                 packages: [ 
                     { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Jetons - $3.00' }, 
                     { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Jetons - $5.00' }, 
                     { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Jetons - $10.00' }, 
                 ],
                 translations: { title: "Machine à Sous Virtuelle", welcome: "Bienvenue !", clickToStart: "Cliquez n'importe où pour commencer", subtitle: "Gagnez 1 000 si vous obtenez les 3 symboles !!!", balance: "SOLDE", chips: "JETONS", spin: "TOURNER", buyChips: "Acheter des Jetons", goodLuck: "Bonne Chance !", insufficientChips: "Jetons insuffisants !", spinning: "Rotation...", tryAgain: "Réessayez !", youWon: "Vous avez gagné {amount} jetons !", buyChipsTitle: "Acheter des Jetons", almostThere: "Presque là !", emailInfo: "Nous vous contacterons par cet e-mail si vous gagnez.", payWithCard: "Payer par Carte", cardInfo: "Entrez les détails de votre carte ci-dessous.", pay: "Payer {amount}", processing: "Traitement...", paymentSuccessful: "Paiement réussi !", enterValidEmail: "Veuillez saisir un e-mail valide.", error_generic: "Une erreur est survenue", error_api_keys: "Veuillez vérifier la configuration du serveur." }
+            },
+            'de': {
+                paymentGateway: 'Stripe', lang: 'de-DE', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Chips - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Chips - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Chips - $10.00' },
+                ],
+                translations: { title: "Virtueller Spielautomat", welcome: "Willkommen!", clickToStart: "Klicken Sie irgendwo, um zu starten", subtitle: "Gewinnen Sie 1.000, wenn Sie 3 Symbole treffen!!!", balance: "GUTHABEN", chips: "CHIPS", spin: "DREHEN", buyChips: "Chips Kaufen", goodLuck: "Viel Glück!", insufficientChips: "Nicht genügend Chips!", spinning: "Dreht...", tryAgain: "Versuchen Sie es erneut!", youWon: "Sie haben {amount} Chips gewonnen!", buyChipsTitle: "Chips Kaufen", almostThere: "Fast geschafft!", emailInfo: "Wir werden Sie über diese E-Mail kontaktieren, wenn Sie gewinnen.", payWithCard: "Mit Karte bezahlen", cardInfo: "Geben Sie unten Ihre Kartendaten ein.", pay: "Bezahlen {amount}", processing: "Verarbeite...", paymentSuccessful: "Zahlung erfolgreich!", enterValidEmail: "Bitte geben Sie eine gültige E-Mail ein.", error_generic: "Ein Fehler ist aufgetreten", error_api_keys: "Bitte überprüfen Sie die Serverkonfiguration." }
+            },
+            'ru': {
+                paymentGateway: 'Stripe', lang: 'ru-RU', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 фишек - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 фишек - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 фишек - $10.00' },
+                ],
+                translations: { title: "Виртуальный игровой автомат", welcome: "Добро пожаловать!", clickToStart: "Нажмите в любом месте, чтобы начать", subtitle: "Выиграйте 1000, если совпадут 3 символа!!!", balance: "БАЛАНС", chips: "ФИШКИ", spin: "ВРАЩАТЬ", buyChips: "Купить фишки", goodLuck: "Удачи!", insufficientChips: "Недостаточно фишек!", spinning: "Вращение...", tryAgain: "Попробуйте снова!", youWon: "Вы выиграли {amount} фишек!", buyChipsTitle: "Купить фишки", almostThere: "Почти готово!", emailInfo: "Мы свяжемся с вами по этому адресу электронной почты в случае выигрыша.", payWithCard: "Оплатить картой", cardInfo: "Введите данные вашей карты ниже.", pay: "Оплатить {amount}", processing: "Обработка...", paymentSuccessful: "Платеж успешно совершен!", enterValidEmail: "Пожалуйста, введите действительный адрес электронной почты.", error_generic: "Произошла ошибка", error_api_keys: "Пожалуйста, проверьте конфигурацию сервера." }
+            },
+            'ja': {
+                paymentGateway: 'Stripe', lang: 'ja-JP', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 チップ - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 チップ - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 チップ - $10.00' },
+                ],
+                translations: { title: "バーチャルスロットマシン", welcome: "ようこそ！", clickToStart: "クリックして開始", subtitle: "3つのシンボルが揃うと1,000を獲得！", balance: "残高", chips: "チップ", spin: "スピン", buyChips: "チップを購入", goodLuck: "幸運を！", insufficientChips: "チップが不足しています！", spinning: "スピン中...", tryAgain: "もう一度お試しください！", youWon: "{amount}チップを獲得しました！", buyChipsTitle: "チップを購入", almostThere: "もうすぐです！", emailInfo: "当選した場合は、このメールアドレスにご連絡いたします。", payWithCard: "カードで支払う", cardInfo: "以下にカード情報を入力してください。", pay: "{amount}を支払う", processing: "処理中...", paymentSuccessful: "支払いが成功しました！", enterValidEmail: "有効なメールアドレスを入力してください。", error_generic: "エラーが発生しました", error_api_keys: "サーバーの設定を確認してください。" }
+            },
+            'ko': {
+                paymentGateway: 'Stripe', lang: 'ko-KR', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 칩 - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 칩 - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 칩 - $10.00' },
+                ],
+                translations: { title: "가상 슬롯 머신", welcome: "환영합니다!", clickToStart: "시작하려면 아무 곳이나 클릭하세요", subtitle: "3개의 심볼이 모두 맞으면 1,000을 획득하세요!!!", balance: "잔액", chips: "칩", spin: "스핀", buyChips: "칩 구매", goodLuck: "행운을 빕니다!", insufficientChips: "칩이 부족합니다!", spinning: "회전 중...", tryAgain: "다시 시도하세요!", youWon: "{amount}개의 칩을 획득했습니다!", buyChipsTitle: "칩 구매", almostThere: "거의 다 왔습니다!", emailInfo: "우승 시 이 이메일로 연락드립니다.", payWithCard: "카드로 결제", cardInfo: "아래에 카드 정보를 입력하세요.", pay: "{amount} 결제", processing: "처리 중...", paymentSuccessful: "결제가 완료되었습니다!", enterValidEmail: "유효한 이메일을 입력하세요.", error_generic: "오류가 발생했습니다", error_api_keys: "서버 구성을 확인하십시오." }
+            },
+            'zh': {
+                paymentGateway: 'Stripe', lang: 'zh-CN', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 筹码 - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 筹码 - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 筹码 - $10.00' },
+                ],
+                translations: { title: "虚拟老虎机", welcome: "欢迎！", clickToStart: "点击任意位置开始", subtitle: "如果3个符号全部匹配，即可赢得1000！", balance: "余额", chips: "筹码", spin: "旋转", buyChips: "购买筹码", goodLuck: "祝您好运！", insufficientChips: "筹码不足！", spinning: "旋转中...", tryAgain: "再试一次！", youWon: "您赢得了{amount}个筹码！", buyChipsTitle: "购买筹码", almostThere: "即将完成！", emailInfo: "如果您获胜，我们将通过此电子邮件与您联系。", payWithCard: "用卡支付", cardInfo: "请在下方输入您的卡信息。", pay: "支付 {amount}", processing: "处理中...", paymentSuccessful: "支付成功！", enterValidEmail: "请输入有效的电子邮件。", error_generic: "发生错误", error_api_keys: "请检查服务器配置。" }
+            },
+            'hi': {
+                paymentGateway: 'Stripe', lang: 'hi-IN', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 चिप्स - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 चिप्स - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 चिप्स - $10.00' },
+                ],
+                translations: { title: "वर्चुअल स्लॉट मशीन", welcome: "आपका स्वागत है!", clickToStart: "शुरू करने के लिए कहीं भी क्लिक करें", subtitle: "यदि सभी 3 प्रतीक मेल खाते हैं तो 1,000 जीतें!!!", balance: "शेष", chips: "चिप्स", spin: "स्पिन", buyChips: "चिप्स खरीदें", goodLuck: "शुभकामनाएं!", insufficientChips: "पर्याप्त चिप्स नहीं हैं!", spinning: "घूम रहा है...", tryAgain: "पुनः प्रयास करें!", youWon: "आपने {amount} चिप्स जीते!", buyChipsTitle: "चिप्स खरीदें", almostThere: "लगभग हो गया!", emailInfo: "यदि आप जीतते हैं तो हम इस ईमेल के माध्यम से आपसे संपर्क करेंगे।", payWithCard: "कार्ड से भुगतान करें", cardInfo: "नीचे अपने कार्ड का विवरण दर्ज करें।", pay: "{amount} भुगतान करें", processing: "संसाधित हो रहा है...", paymentSuccessful: "भुगतान सफल!", enterValidEmail: "कृपया एक वैध ईमेल दर्ज करें।", error_generic: "एक त्रुटि हुई", error_api_keys: "कृपया सर्वर कॉन्फ़िगरेशन की जाँच करें।" }
+            },
+            'fil': {
+                paymentGateway: 'Stripe', lang: 'fil-PH', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Chips - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Chips - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Chips - $10.00' },
+                ],
+                translations: { title: "Virtual Slot Machine", welcome: "Maligayang pagdating!", clickToStart: "Mag-click kahit saan para magsimula", subtitle: "Manalo ng 1,000 kung tumugma ang lahat ng 3 simbolo!!!", balance: "BALANSE", chips: "CHIPS", spin: "PAIKUTIN", buyChips: "Bumili ng Chips", goodLuck: "Good Luck!", insufficientChips: "Hindi sapat ang chips!", spinning: "Umiikot...", tryAgain: "Subukang muli!", youWon: "Nanalo ka ng {amount} chips!", buyChipsTitle: "Bumili ng Chips", almostThere: "Malapit na!", emailInfo: "Makikipag-ugnayan kami sa iyo sa pamamagitan ng email na ito kung manalo ka.", payWithCard: "Magbayad gamit ang Card", cardInfo: "Ilagay ang mga detalye ng iyong card sa ibaba.", pay: "Magbayad ng {amount}", processing: "Pinoproseso...", paymentSuccessful: "Matagumpay ang pagbabayad!", enterValidEmail: "Mangyaring maglagay ng wastong email.", error_generic: "May naganap na error", error_api_keys: "Pakisuri ang configuration ng server." }
+            },
+            'sv': {
+                paymentGateway: 'Stripe', lang: 'sv-SE', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Marker - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Marker - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Marker - $10.00' },
+                ],
+                translations: { title: "Virtuell Spelautomat", welcome: "Välkommen!", clickToStart: "Klicka var som helst för att börja", subtitle: "Vinn 1 000 om du matchar alla 3 symboler!!!", balance: "SALDO", chips: "MARKER", spin: "SNURRA", buyChips: "Köp Marker", goodLuck: "Lycka till!", insufficientChips: "Inte tillräckligt med marker!", spinning: "Snurrar...", tryAgain: "Försök igen!", youWon: "Du vann {amount} marker!", buyChipsTitle: "Köp Marker", almostThere: "Nästan där!", emailInfo: "Vi kontaktar dig via detta e-postmeddelande om du vinner.", payWithCard: "Betala med kort", cardInfo: "Ange dina kortuppgifter nedan.", pay: "Betala {amount}", processing: "Bearbetar...", paymentSuccessful: "Betalning lyckades!", enterValidEmail: "Vänligen ange en giltig e-postadress.", error_generic: "Ett fel inträffade", error_api_keys: "Kontrollera serverkonfigurationen." }
+            },
+            'pl': {
+                paymentGateway: 'Stripe', lang: 'pl-PL', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 Żetonów - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 Żetonów - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 Żetonów - $10.00' },
+                ],
+                translations: { title: "Wirtualny Automat do Gier", welcome: "Witaj!", clickToStart: "Kliknij w dowolnym miejscu, aby rozpocząć", subtitle: "Wygraj 1000, jeśli trafisz wszystkie 3 symbole!!!", balance: "SALDO", chips: "ŻETONY", spin: "OBRÓĆ", buyChips: "Kup Żetony", goodLuck: "Powodzenia!", insufficientChips: "Za mało żetonów!", spinning: "Kręci się...", tryAgain: "Spróbuj ponownie!", youWon: "Wygrałeś {amount} żetonów!", buyChipsTitle: "Kup Żetony", almostThere: "Prawie gotowe!", emailInfo: "Skontaktujemy się z Tobą za pośrednictwem tego e-maila, jeśli wygrasz.", payWithCard: "Zapłać kartą", cardInfo: "Wprowadź dane swojej karty poniżej.", pay: "Zapłać {amount}", processing: "Przetwarzanie...", paymentSuccessful: "Płatność udana!", enterValidEmail: "Proszę podać prawidłowy adres e-mail.", error_generic: "Wystąpił błąd", error_api_keys: "Sprawdź konfigurację serwera." }
+            },
+            'bn': {
+                paymentGateway: 'Stripe', lang: 'bn-BD', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '১০ চিপস - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '২৫ চিপস - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '১০০ চিপস - $10.00' },
+                ],
+                translations: { title: "ভার্চুয়াল স্লট মেশিন", welcome: "স্বাগতম!", clickToStart: "শুরু করতে যেকোনো জায়গায় ক্লিক করুন", subtitle: "যদি ৩টি প্রতীকই মিলে যায় তবে ১,০০০ জিতুন!!!", balance: "ব্যালেন্স", chips: "চিপস", spin: "স্পিন", buyChips: "চিপস কিনুন", goodLuck: "শুভকামনা!", insufficientChips: "পর্যাপ্ত চিপস নেই!", spinning: "ঘুরছে...", tryAgain: "আবার চেষ্টা করুন!", youWon: "আপনি {amount} চিপস জিতেছেন!", buyChipsTitle: "চিপস কিনুন", almostThere: "প্রায় হয়ে গেছে!", emailInfo: "আপনি জিতলে আমরা এই ইমেলের মাধ্যমে আপনার সাথে যোগাযোগ করব।", payWithCard: "কার্ড দিয়ে পেমেন্ট করুন", cardInfo: "নিচে আপনার কার্ডের বিবরণ লিখুন।", pay: "{amount} পেমেন্ট করুন", processing: "প্রসেসিং...", paymentSuccessful: "পেমেন্ট সফল হয়েছে!", enterValidEmail: "অনুগ্রহ করে একটি বৈধ ইমেল লিখুন।", error_generic: "একটি ত্রুটি ঘটেছে", error_api_keys: "অনুগ্রহ করে সার্ভার কনফিগারেশন চেক করুন।" }
+            },
+            'ar': {
+                paymentGateway: 'Stripe', lang: 'ar-SA', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 رقائق - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 رقاقة - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 رقاقة - $10.00' },
+                ],
+                translations: { title: "ماكينة القمار الافتراضية", welcome: "أهلاً بك!", clickToStart: "انقر في أي مكان للبدء", subtitle: "اربح 1000 إذا طابقت جميع الرموز الثلاثة!!!", balance: "الرصيد", chips: "رقائق", spin: "تدوير", buyChips: "شراء رقائق", goodLuck: "حظاً موفقاً!", insufficientChips: "لا توجد رقائق كافية!", spinning: "جارٍ التدوير...", tryAgain: "حاول مرة أخرى!", youWon: "لقد فزت بـ {amount} من الرقائق!", buyChipsTitle: "شراء رقائق", almostThere: "أوشكت على الانتهاء!", emailInfo: "سنتصل بك عبر هذا البريد الإلكتروني إذا فزت.", payWithCard: "الدفع بالبطاقة", cardInfo: "أدخل تفاصيل بطاقتك أدناه.", pay: "ادفع {amount}", processing: "قيد المعالجة...", paymentSuccessful: "تم الدفع بنجاح!", enterValidEmail: "الرجاء إدخال بريد إلكتروني صالح.", error_generic: "حدث خطأ", error_api_keys: "يرجى التحقق من تكوين الخادم." }
+            },
+            'he': {
+                paymentGateway: 'Stripe', lang: 'he-IL', currency: '$',
+                packages: [
+                    { id: 'pack_10_usd', chips: 10, price: 3.00, display: '10 צ\'יפים - $3.00' },
+                    { id: 'pack_25_usd', chips: 25, price: 5.00, display: '25 צ\'יפים - $5.00' },
+                    { id: 'pack_100_usd', chips: 100, price: 10.00, display: '100 צ\'יפים - $10.00' },
+                ],
+                translations: { title: "מכונת מזל וירטואלית", welcome: "ברוך הבא!", clickToStart: "לחץ בכל מקום כדי להתחיל", subtitle: "זכה ב-1,000 אם תתאים את כל 3 הסמלים!!!", balance: "יתרה", chips: "צ'יפים", spin: "סובב", buyChips: "קנה צ'יפים", goodLuck: "בהצלחה!", insufficientChips: "אין מספיק צ'יפים!", spinning: "מסתובב...", tryAgain: "נסה שוב!", youWon: "זכית ב-{amount} צ'יפים!", buyChipsTitle: "קנה צ'יפים", almostThere: "כמעט שם!", emailInfo: "ניצור איתך קשר באמצעות דוא\"ל זה אם תזכה.", payWithCard: "שלם בכרטיס", cardInfo: "הזן את פרטי הכרטיס שלך למטה.", pay: "שלם {amount}", processing: "מעבד...", paymentSuccessful: "התשלום הושלם בהצלחה!", enterValidEmail: "אנא הזן דוא\"ל חוקי.", error_generic: "אירעה שגיאה", error_api_keys: "אנא בדוק את תצורת השרת." }
             }
         };
 
@@ -165,8 +282,10 @@
 
         // --------------- LÓGICA DE INICIALIZAÇÃO ---------------
         window.onload = async () => {
-            const userLang = (navigator.language || navigator.userLanguage).substring(0, 2);
-            localeConfig = locales[userLang] || locales['en'];
+            const userFullLang = (navigator.language || navigator.userLanguage).toLowerCase(); // ex: 'pt-br'
+            const userShortLang = userFullLang.substring(0, 2); // ex: 'pt'
+            localeConfig = locales[userFullLang] || locales[userShortLang] || locales['en'];
+            
             applyTranslations();
 
             try {
@@ -449,7 +568,15 @@
                     </div>`;
 
                 const elements = stripe.elements({ clientSecret });
-                const paymentElement = elements.create('payment');
+                const paymentElement = elements.create('payment', {
+                  fields: {
+                    billingDetails: {
+                      address: {
+                        country: 'never'
+                      }
+                    }
+                  }
+                });
                 paymentElement.mount('#payment-element');
 
                 document.getElementById('stripe-payment-form').addEventListener('submit', async (e) => {
