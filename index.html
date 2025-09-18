@@ -52,7 +52,7 @@
         
         /* CSS da Animação de Piscar */
         .blinking-text {
-            animation: blink-animation 3.5s infinite;
+            animation: blink-animation 2.25s infinite;
         }
 
         @keyframes blink-animation {
@@ -127,11 +127,11 @@
                 translations: {
                     mainTitle: "🎰 Caça-Níquel PIX 🎰",
                     title: "Caça-Níquel Virtual", welcome: "Bem-Vindo!", clickToStart: "Clique em qualquer lugar para começar",
-                    subtitle: "Ganhe <strong>100.000 REAIS (CEM MIL)</strong> se acertar as 3 figuras!!!",
+                    subtitle: "Ganhe <strong>100.000 REAIS</strong> se acertar as 3 figuras!!!",
                     balance: "SALDO", chips: "FICHAS", spin: "GIRAR",
                     buyChips: "Comprar Fichas", goodLuck: "Boa Sorte!", insufficientChips: "Fichas insuficientes!",
                     spinning: "Girando...", tryAgain: "Tente Novamente!", youWon: "Você ganhou {amount} fichas!",
-                    buyChipsTitle: "Comprar Fichas", almostThere: "Quase lá!", emailInfo: "Escreva o seu e-mail abaixo, se você ganhar entraremos em contato através do seu e-mail:",
+                    buyChipsTitle: "Comprar Fichas", almostThere: "Quase lá!", emailInfo: "Escreva o seu e-mail abaixo, se voce ganhar entraremos em contato atraves do seu e-mail:",
                     payWithPix: "Pague com PIX", scanQrCode: "Escaneie o QR Code abaixo:", orUseCopyPaste: "Ou use o PIX Copia e Cola:",
                     waitingPayment: "Aguardando pagamento...", copy: "Copiar", copied: "Copiado!", paymentApproved: "Pagamento aprovado! Fichas creditadas.",
                     generatingPix: "Gerando PIX...", enterValidEmail: "Por favor, insira um e-mail válido.",
@@ -319,6 +319,12 @@
                 console.error("Error loading balance:", error);
                 chipBalanceSpan.innerHTML = `Error. <button onclick="window.location.reload()" style="font-size: 0.7em; margin-left: 5px;">Reload</button>`;
             }
+
+            const buyChipsBtn = document.getElementById('buy-chips-btn');
+            buyChipsBtn.classList.add('pulsating-button');
+            setTimeout(() => {
+                buyChipsBtn.classList.remove('pulsating-button');
+            }, 10000);
         };
 
         const startOverlay = document.getElementById('start-overlay');
@@ -351,6 +357,16 @@
             if (isNaN(currentBalance) || currentBalance < betAmount) {
                 resultText.textContent = t('insufficientChips');
                 resultText.style.color = 'red';
+                
+                const buyChipsBtn = document.getElementById('buy-chips-btn');
+                buyChipsBtn.classList.remove('pulsating-button');
+                void buyChipsBtn.offsetWidth; 
+                buyChipsBtn.classList.add('pulsating-button');
+
+                setTimeout(() => {
+                    buyChipsBtn.classList.remove('pulsating-button');
+                }, 10000);
+
                 return;
             }
             spinBtn.disabled = true;
