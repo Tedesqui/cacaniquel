@@ -10,9 +10,15 @@
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--dark-bg); color: var(--light-text); margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; }
         .header { text-align: center; margin-bottom: 20px; }
-        .subtitle { color: var(--secondary-color); font-size: 1.2em; font-weight: bold; text-transform: uppercase; margin-top: -10px; }
-        .subtitle strong { /* Este estilo garante que o texto em destaque mantenha a cor do subtítulo */
-            color: inherit; 
+        .subtitle {
+            color: var(--secondary-color);
+            font-size: 1.2em;
+            font-weight: bold;
+            /* text-transform: uppercase; <-- LINHA REMOVIDA */
+            margin-top: -10px;
+        }
+        .subtitle strong {
+            color: inherit;
         }
         .balance { background-color: #333; padding: 10px 20px; border-radius: 50px; font-size: 1.2em; font-weight: bold; }
         .balance span { color: var(--secondary-color); }
@@ -279,7 +285,6 @@
         function applyTranslations() {
             document.querySelectorAll('[data-i18n-key]').forEach(el => {
                 const key = el.getAttribute('data-i18n-key');
-                // Alterado para innerHTML para renderizar as tags <strong> no subtítulo
                 el.innerHTML = t(key);
             });
             document.documentElement.lang = localeConfig.lang;
@@ -287,8 +292,8 @@
 
         // --------------- LÓGICA DE INICIALIZAÇÃO ---------------
         window.onload = async () => {
-            const userFullLang = (navigator.language || navigator.userLanguage).toLowerCase(); // ex: 'pt-br'
-            const userShortLang = userFullLang.substring(0, 2); // ex: 'pt'
+            const userFullLang = (navigator.language || navigator.userLanguage).toLowerCase(); 
+            const userShortLang = userFullLang.substring(0, 2); 
             localeConfig = locales[userFullLang] || locales[userShortLang] || locales['en'];
             
             applyTranslations();
