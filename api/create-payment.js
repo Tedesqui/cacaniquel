@@ -1,53 +1,43 @@
-import Stripe from 'stripe';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
+import { kv } from '@vercel/kv';
 
-// Inicialize o Stripe com sua chave secreta.
-// IMPORTANTE: Guarde sua chave em variáveis de ambiente, nunca diretamente no código.
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// Defina os pacotes e seus preços. Use os mesmos IDs do seu frontend.
-// ATENÇÃO: O valor para o Stripe deve ser em CENTAVOS (ou a menor unidade da moeda).
 const packages = {
-    'pack_10_usd': { price_in_cents: 100 },   // $1.00 = 100 centavos
-    'pack_25_usd': { price_in_cents: 200 },   // $2.00 = 200 centavos
-    'pack_250_usd': { price_in_cents: 1000 } // $10.00 = 1000 centavos
+    'pack_10': 10,
+    'pack_25': 25,
+    'pack_100': 100,
+    'pack_250': 250 // ADICIONADO
 };
 
 export default async function handler(request, response) {
-    // Permite apenas requisições do tipo POST
-    if (request.method !== 'POST') {
-        return response.status(405).json({ error: 'Method Not Allowed' });
-    }
+    const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+    const { paymentId } = request.query;
 
+    if (!accessToken || !paymentId) return response.status(400).json({ error: 'Dados insuficientes.' });
+
+    const client = new MercadoPagoConfig({ accessToken });
+    
     try {
-        const { packageId, email } = request.body;
-        const selectedPackage = packages[packageId];
-
-        // Validação dos dados recebidos
-        if (!selectedPackage || !email) {
-            return response.status(400).json({ error: 'Dados insuficientes: packageId ou email faltando.' });
-        }
-
-        // Crie a "Intenção de Pagamento" (PaymentIntent) no Stripe
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: selectedPackage.price_in_cents, // Valor em centavos
-            currency: 'usd',                         // Moeda (dólar americano)
-            automatic_payment_methods: {
-                enabled: true,
-            },
-            // Metadata é útil para guardar informações adicionais, como o email ou ID do pacote.
-            metadata: {
-                packageId: packageId,
-                userEmail: email
+        const payment = await new Payment(client).get({ id: Number(paymentId) });
+        
+        if (payment.status === 'approved') {
+            const { user_id, package_id } = payment.metadata;
+            const chipsToAdd = packages[package_id] || 0;
+            
+            if (chipsToAdd > 0) {
+                const userBalanceKey = `user:${user_id}:chips`;
+                const processed = await kv.get(`payment:${paymentId}:processed`);
+                if (!processed) {
+                    const newBalance = await kv.incrby(userBalanceKey, chipsToAdd);
+                    await kv.set(`payment:${paymentId}:processed`, true, { ex: 86400 }); 
+                    return response.status(200).json({ status: 'approved', newBalance });
+                }
             }
-        });
-
-        // Envie o "client_secret" de volta para o frontend
-        response.status(200).json({
-            clientSecret: paymentIntent.client_secret,
-        });
+        }
+        
+        return response.status(200).json({ status: payment.status });
 
     } catch (error) {
-        console.error("Erro na API do Stripe:", error);
-        response.status(500).json({ error: 'Falha ao iniciar o pagamento com Stripe.' });
+        console.error("Erro ao verificar pagamento:", error);
+        return response.status(500).json({ error: 'Falha ao verificar pagamento.' });
     }
 }
