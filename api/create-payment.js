@@ -20,24 +20,19 @@ export default async function handler(request, response) {
         return response.status(500).json({ error: 'Mercado Pago access token not configured.' });
     }
 
-    // --- Gerenciamento de Sessão/Usuário ---
     const cookies = parse(request.headers.cookie || '');
     let userId = cookies.userId;
     if (!userId) {
         userId = uuidv4();
-        // Define o cookie para o usuário por 1 ano
         response.setHeader('Set-Cookie', serialize('userId', userId, { path: '/', maxAge: 31536000 }));
     }
-    // --- Fim da Sessão ---
 
     try {
-        const { packageId, email, firstName, lastName, cpf } = request.body;
+        const { packageId, email } = request.body;
         const selectedPackage = packages[packageId];
 
-        // Validação dos dados recebidos
-        if (!selectedPackage || !email || !firstName || !lastName || !cpf) {
-            // O erro original acontecia aqui!
-            return response.status(400).json({ error: 'Dados insuficientes. Todos os campos são obrigatórios: packageId, email, nome, sobrenome e CPF.' });
+        if (!selectedPackage || !email) {
+            return response.status(400).json({ error: 'Dados insuficientes. É necessário packageId e email.' });
         }
         
         const client = new MercadoPagoConfig({ accessToken });
@@ -47,19 +42,12 @@ export default async function handler(request, response) {
             description: `${selectedPackage.chips} Fichas para Caça-Níquel`,
             payment_method_id: 'pix',
             payer: {
-                email: email,
-                first_name: firstName,
-                last_name: lastName,
-                identification: {
-                    type: 'CPF',
-                    number: cpf.replace(/\D/g, '') // Remove pontos e traços do CPF
-                }
+                email: email, // Enviando apenas o e-mail do pagador
             },
             metadata: {
                 user_id: userId,
                 package_id: packageId
-            },
-            notification_url: 'https://seusite.com/api/webhook-mercadopago' // Opcional, mas recomendado
+            }
         };
 
         const payment = await new Payment(client).create({ body: paymentBody });
@@ -76,7 +64,6 @@ export default async function handler(request, response) {
 
     } catch (error) {
         console.error("Erro ao criar pagamento no Mercado Pago:", error.cause || error);
-        // Retorna a mensagem de erro da API do MP se disponível
         const errorMessage = error.cause?.error?.message || 'Falha ao criar o pagamento PIX.';
         return response.status(500).json({ error: errorMessage });
     }
