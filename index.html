@@ -275,7 +275,6 @@
                 ],
                 translations: { mainTitle: "🎰 מכונת מזל וירטואלית 🎰", title: "מכונת מזל וירטואלית", welcome: "ברוך הבא!", clickToStart: "לחץ בכל מקום כדי להתחיל", subtitle: "זכה ב-<strong>20,000 DOLLARS</strong> אם תתאים את כל 3 הסמלים!!!", balance: "יתרה", chips: "צ'יפים", spin: "סובב", buyChips: "קנה צ'יפים", goodLuck: "בהצלחה!", insufficientChips: "אין מספיק צ'יפים!", spinning: "מסתובב...", tryAgain: "נסה שוב!", youWon: "זכית ב-{amount} צ'יפים!", buyChipsTitle: "קנה צ'יפים", almostThere: "כמעט שם!", emailInfo: "הזן את כתובת הדוא\"ל שלך למטה. אם תזכה, ניצור איתך קשר באמצעות כתובת הדוא\"ל שלך:", payWithCard: "שלם בכרטיס", cardInfo: "הזן את פרטי הכרטיס שלך למטה.", pay: "שלם {amount}", processing: "מעבד...", paymentSuccessful: "התשלום הושלם בהצלחה!", enterValidEmail: "אנא הזן דוא\"ל חוקי.", error_generic: "אירעה שגיאה", error_api_keys: "אנא בדוק את תצורת השרת." }
             },
-            // ----- NOVA TRADUÇÃO ADICIONADA -----
             'fil': {
                 paymentGateway: 'Stripe', lang: 'fil-PH', currency: '$',
                 packages: [
@@ -331,9 +330,9 @@
 
         // --------------- LÓGICA DE INICIALIZAÇÃO ---------------
         window.onload = async () => {
-            const userFullLang = (navigator.language || navigator.userLanguage).toLowerCase(); 
-            const userShortLang = userFullLang.substring(0, 2); 
-            // A lógica de seleção de idioma foi atualizada para incluir 'fil'
+            const userFullLang = (navigator.language || navigator.userLanguage).toLowerCase();
+            const userShortLang = userFullLang.split('-')[0];
+            
             localeConfig = locales[userFullLang] || locales[userShortLang] || locales['en'];
             
             applyTranslations();
